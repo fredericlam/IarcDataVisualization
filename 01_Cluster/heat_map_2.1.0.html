@@ -5,6 +5,64 @@
   
 	<link rel="icon" href="favicon.ico" />
     <style>
+	
+	body{ padding:0px; max-width:1500px; margin: 0 auto;  font-family:Source Sans Pro, sans-serif;  font-size:100%;}
+	#header{ background:#fff  ; width:100%; display:inline-block; position:relative; margin-top:10px;     z-index: 24;}
+	
+	/*Main Title*/
+		#header div {float: left;padding-bottom: 10px; width:100%;}
+		#header div h1{ margin-bottom:0px; }
+		#header div h1 a{ display:block;text-align:center; color:#000;  text-decoration:none;outline: none;}
+		#header div.desc{ text-align:center;  font-size:1em;}
+	
+	#option {
+	
+	text-align: center;
+    margin: 10px auto;
+	
+	}
+	
+	form {
+		display:inline-block;
+		max-width:350px;
+		margin-right:50px;
+
+	}
+	
+
+	
+	form h4{
+		text-align:center;
+		margin: 5px;
+	}
+		
+	    .custom-radio{
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        position: relative;
+        z-index: 1;
+        top: 3px;
+    }
+    .custom-radio:hover{            
+    }
+    .custom-radio.selected{
+    }
+    .custom-radio input[type="radio"]{
+        margin: 1px;
+        position: absolute;
+        z-index: 2;            
+        cursor: pointer;
+        outline: none;
+        opacity: 0;
+        /* CSS hacks for older browsers */
+        _noFocusLine: expression(this.hideFocus=true); 
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+        filter: alpha(opacity=0);
+        -khtml-opacity: 0;
+        -moz-opacity: 0;
+    }
+	
       rect.bordered   {
         stroke: #303030;
         stroke-width:0.5px;   
@@ -178,30 +236,32 @@
 		
 	};
 
-	function combo_row(thelist)
+	
+	function combo_row(order)
 	 {
-
-	   var idx_1 = thelist.selectedIndex;
-	   row_select = thelist.options[idx_1].innerHTML;
+		
+	   row_select = order;
 	   sortBars();
 	}
 	
-	function combo_fill(thelist)
+	function combo_fill(fill)
 	 {
 
-	   var idx_1 = thelist.selectedIndex;
-	   fill_select = thelist.options[idx_1].innerHTML;
+	   fill_select = fill;
 	   area_fill()
 	}
 	
-	function combo_sex(thelist)
+
+ 	function combo_sex(sex)
 	{
 
-	   var idx_1 = thelist.selectedIndex;
-	   sex_select = thelist.options[idx_1].innerHTML;
+	   sex_select = sex;
 	   d3.selectAll("svg").remove();
-	   document.getElementById('OrderList').selectedIndex = 0;
-	   document.getElementById('FillList').selectedIndex = 0;
+ 	   // document.getElementById('radio_cluster_off').checked= true;
+	   document.getElementById('radio_cluster_on').checked= false;
+	   document.getElementById('radio_cluster_off').checked= true;
+	   document.getElementById('radio_color_hdi').checked= true;
+	   document.getElementById('radio_color_area').checked= false;
 	   document.getElementById('countryList').selectedIndex = 0;
 	   Flag_selected_country = false;
 	   Heatmap_gen();
@@ -1023,28 +1083,48 @@
   	
 	<body>
 	
-		<select name="sex_select" onChange="combo_sex(this)">
-		  <option  selected>Women</option>
-		  <option>Men</option>
-		</select> 
-		
-
-		<select name="row_order" id="OrderList" onChange="combo_row(this)">
-		  <option  selected>Alphabetic</option>
-		  <option>Cluster</option>
-		</select> 
-
-		<select name="fill_order" id="FillList"  onChange="combo_fill(this)">
-		  <option  selected>hdi</option>
-		  <option>area</option>
-		</select> 
-		
-		<select name="country_select" id="countryList" onChange="combo_country(this)">
-		 <option value=0>Select a country</option>
-		</select> 
-		
-		<div id="chart"></div>
-		
+	<div id="header" >
+		<div>
+			<h1><a href="#"> Cancer and HDI heatmap</a></h1>
+			<div class="desc">
+				Profiling The Diversity Of Cancer According To Human Development
+			</div>
+		</div>		
+	
+	</div>
+	
+	<div id="option">
+	
+	<form>
+    <h4>Sex</h4>
+    <label><input type="radio" id="radio_sex_female" name="sex" checked="checked"  onChange="combo_sex('Women')"> Female</label>
+    <label><input type="radio" id="radio_sex_male"  name="sex" onChange="combo_sex('Men')"> Male</label>
+	</form>
+	
+	<form>
+    <h4>Clustering</h4>
+    <label><input type="radio" id="radio_cluster_off"  name="cluster" checked="checked"   onChange="combo_row('Alphabetical')"> Off</label>
+    <label><input type="radio" id="radio_cluster_on"   name="cluster" onChange="combo_row('Cluster')"> On</label>
+	</form>
+	
+	<form>
+    <h4>Color</h4>
+    <label><input type="radio" id="radio_color_hdi"  name="color" checked="checked" value="hdi" onChange="combo_fill('hdi')"> HDI</label>
+    <label><input type="radio" id="radio_color_area" name="color" value="area" onChange="combo_fill('test')"> Area</label>
+	</form>
+	
+	<form class="comboCountry">
+	
+	<h4>Country</h4>
+	<select name="country_select" id="countryList" onChange="combo_country(this)">
+	 <option value=0>All countries</option>
+	</select> 
+	</form>
+	
+	</div>
+	
+	<div id="chart"></div>
+	
 	
 		
 		
