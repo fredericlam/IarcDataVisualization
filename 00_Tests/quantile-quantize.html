@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: "Montserrat", Avenir Next, Arial, Helvetica, sans-serif;;
+  font-size: 15px;
+  margin: 60px 0 0 60px;
+  color: #444;
+}
+
+svg {
+  height: 260px;
+  width: 280px;
+  font-size: 13px;
+}
+
+.column {
+  float: left;
+}
+
+.output {
+  margin: 0 0 8px 20px;
+  font-weight: bold;
+}
+
+.output strong {
+  display: inline-block;
+  width: 70px;
+  margin-right: 6px;
+  color: #111;
+  text-align: right;
+}
+
+.output span {
+  display: inline-block;
+  padding: 1px 3px;
+  margin: 0 5px;
+  background: #f0f0f0;
+  border-radius: 2px;
+}
+
+.column h4 {
+  color: #111;
+  margin: 24px 0 -12px 20px;
+}
+
+.space {
+  position: absolute;
+}
+
+.space canvas {
+  float: left;
+}
+
+.space div {
+  position: absolute;
+  top: 0;
+  left: 20px;
+}
+
+</style>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="http://d3-legend.susielu.com/d3-legend.min.js"></script>
+<script src="js/cubehelix.min.js"></script>
+<script src="js/colorbrewer.min.js"></script>
+<script>
+var domain = [0, 1, 21 , 32 , 45 , 10, 100, 1000, 10000, 100000, 1000000];
+var domain = [97.66698821651994, 112.36100847843389, 74.6062145875112, 75.59922480765768, 93.22094216581485, 115.13082923150381, 96.36206447445119, 103.46118957624309, 99.85544122658955, 54.28476292875419, 80.79361024236023, 150.29491032501377, 109.27769778706869, 116.2349216781993, 67.24947022719807, 90.92080834490693, 95.12549188175281, 71.30923973789487, 103.7156841699555, 96.86981417721137, 85.99616889606722, 78.38631991136594, 120.48707619417245, 112.61821840609149, 116.99968227483322, 120.57413996875478, 110.93534203579918, 69.50296760333703, 103.20847397489209, 50.16636542561281, 74.25148861196104, 54.55509801915862, 72.63824019212589, 103.00692057503204, 122.19195739379734, 84.96503189399483, 81.40696765831983, 59.91015579243292, 93.13993847353177, 84.93973050191305, 136.73106574501818, 123.77832844997019, 78.38671158869882, 121.65504653601097, 73.1377648375173, 124.89544740912538, 90.46443033457494, 94.52812001395256, 95.0021655936662, 65.67935889790154, 84.53234368795933, 83.3819266785397, 122.57036715011802, 85.16766341254126, 86.05302986462378, 107.92948003904974, 95.45856661932028, 134.4028461737621, 72.95850281701244, 54.576022057819074, 97.9212388438239, 58.220089074306244, 100.53133921356458, 100.82174486805765, 63.56424093032506, 98.64130180886204, 93.62425712458028, 78.85876707450942, 96.35881516232455, 73.85325850767506, 101.79530124301183, 83.38925907991737, 90.31067560517332, 152.1343413975695, 87.74730709406366, 64.48760485689479, 89.27652909517963, 81.90306066951426, 96.63900514950024, 108.35851601859942, 94.42475301924233, 101.82309280129078, 70.70267184993422, 108.34627520156636, 93.78438797646214, 140.2418183172895, 95.50525593327467, 135.26267349050266, 125.53756684064496, 100.27666817323052, 54.75491948193325, 99.85518406392568, 118.0930300699907, 103.21372302247369, 78.25449890848721, 128.7704563578095, 75.81891906240338, 75.06692414512058, 129.0318347942058, 96.89826941539198] ; 
+var width = 600;
+
+/*var generator = d3.scale.cubehelix().domain([0,domain.length-1]).range([
+  d3.hsl(-100, 0.95, 0.32),
+  d3.hsl(  80, 1.15, 0.62),
+  d3.hsl( 220, 0.55, 0.32)]
+);*/
+
+// var range = d3.range(domain.length).map(generator);
+var range = colorbrewer[ 'OrRd' ][ 8 ] ; 
+
+var output = d3.select("body").append("div")
+  .attr("class", "output");
+
+output.append("strong")
+  .text("Domain ");
+
+output
+  .selectAll("span")
+  .data(domain)
+  .enter().append("span")
+  .text(String);
+
+var output2 = d3.select("body").append("div")
+  .attr("class", "output");
+
+output2.append("strong")
+  .html("Range ");
+
+output2
+  .selectAll("span")
+  .data(range)
+  .enter().append("span")
+  .style("color", String)
+  .text(String);
+
+  console.info( domain ) ; 
+  console.info( range ) ; 
+
+var quantize = d3.scale.quantize()
+  .domain(domain)
+  .range(range);
+
+var quantile = d3.scale.quantile()
+  .domain(domain)
+  .range(range);
+
+var threshold = d3.scale.threshold()
+  .domain(domain)
+  .range(range);
+
+column("d3.scale.quantile", quantile);
+column("d3.scale.quantize", quantize);
+column("d3.scale.threshold", threshold);
+
+function column(title, scale) {
+  var legend = d3.legend.color()
+    .labelFormat(d3.format(",.0f"))
+    .cells(10)
+    .scale(scale);
+
+  var div = d3.select("body").append("div")
+    .attr("class", "column");
+
+  div.append("h4").text(title);
+    
+  var svg = div.append("svg");
+
+  svg.append("g")
+    .attr("class", "legendQuant")
+    .attr("transform", "translate(20,20)");
+
+  svg.select(".legendQuant")
+    .call(legend);
+};
+</script>
