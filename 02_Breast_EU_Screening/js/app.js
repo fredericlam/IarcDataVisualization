@@ -26,6 +26,8 @@
 
 	var key_val = 'PERCENT_T' ; 
 
+    var color_no_data = '#cccccc' ; 
+
     var sweden_regions = {
         0 : { 'name' : 'Norra sjukvårdsregionen' } , 
         1 : { 'name' : 'Uppsala-Örebro sjukvårdsregion' } , 
@@ -70,9 +72,9 @@
     	
         // console.info( topology.objects ) ; 
 
-    	var range_colors  = Array.prototype.slice.call( colorbrewer[ 'PuRd' ][ 9 ] ) ;	
-    	range_colors.unshift('#ffffff') ;
-    	// range_colors[0] = '#ffffff' ;
+    	var range_colors  = Array.prototype.slice.call( colorbrewer[ 'Reds' ][ 9 ] ) ;	
+    	// range_colors.unshift('#ffffff') ;
+    	// range_colors[0] = '#ffffff' ; // 0 or no value means no data = grey 
 
     	var quantize = d3.scale.quantize()
 			.domain( [0,100] )
@@ -100,9 +102,14 @@
 	        .attr('fill',function(d){
 	        	for( var item in data )
 	        		if ( data[item].CODE == d.id )
+                    {
+                        if ( data[item][key_val] == 0 ) return color_no_data ; 
+                        
 	        			// console.info( d.id ,  data[item][key_val] , quantize(data[item][key_val]) );
 	        			return quantize( data[item][key_val] );
-	        	return "#ffffff" ; 
+	        	    }
+
+                return "#ffffff" ; 
 	        })
 	        .attr('title',function(d){ 
                 if ( d.properties == undefined ) return ; 
@@ -134,7 +141,7 @@
                     }
                 }
 
-                return "#ffffff" ; 
+                return color_no_data ; 
             })
             .attr('stroke',function(d,i){
                 var id_region = sweden_counties[i].region ;
@@ -186,13 +193,14 @@
                 {
                     if ( data[item].CODE == 'BE' )
                     {
-                        console.info( data[item] , data[item].CODE_REGION, i ) ; 
                         if ( data[item].CODE_REGION == i )
                         {
                             return quantize( data[item][key_val] );
                         }
                     }
                 }
+
+                return color_no_data ; 
             })
         ;
 
@@ -205,10 +213,22 @@
             .append("path")
             .attr("d", path)
             .attr('class',function(d,i){
-                return "portugal_regions "   ; 
+                return "portugal_regions region_"+i   ; 
             })
             .attr('fill',function(d,i){
-                return "blue" ; 
+                for( var item in data )
+                {
+                    if ( data[item].CODE == 'PT' )
+                    {
+                        // console.info( data[item].CODE_REGION , i ) ; 
+                        //if ( data[item][key_val] == 0 ) return no
+                        if ( data[item].CODE_REGION == i )
+                        { 
+                            return quantize( data[item][key_val] );
+                        }
+                    }
+                }
+                return color_no_data ; 
             })
         ;
 
@@ -231,12 +251,14 @@
                     {
                         if ( data[item].CODE_REGION == id_subunit )
                         {
+                            // if ( Math.abs( data[item][key_val] ) == 0 ) return "#cccccc" ; 
+
                             return quantize( data[item][key_val] );
                         }
                     }
                 }
 
-                return "#ffffff" ; 
+                return color_no_data ; 
             })
         ;
 
@@ -291,7 +313,7 @@
            .attr('color', function(d){ return d;})
            .style("fill", function(d){return d;}) ; 
 
-        /*legend
+        legend
             .append('rect')
             .attr('class','rect_Legend')
             .attr("x", 100 ) 
@@ -300,7 +322,7 @@
             .attr("height", 10 )
             .style("stroke","#cccccc")
             .style("stroke-width", "0.5px")
-            .style("fill", function(d){ return '#ffffff' ;})*/
+            .style("fill", function(d){ return color_no_data ;})
 
         legendEntries
             .append('text')
@@ -329,12 +351,12 @@
             })
         ;
 
-        /*legend
+        legend
             .append('text')
             .attr('class','text_Legend')
             .attr("x",  140 )  // leave 5 pixel space after the <rect>
             .attr("y", lastYText + 15 )  // + (CanMapHeight - 200);})
             .style('font-size','12px')
             .attr("dy", "0.9em") // place text one line *below* the x,y point
-            .text("No data") ;*/
+            .text("No data") ;
     });
