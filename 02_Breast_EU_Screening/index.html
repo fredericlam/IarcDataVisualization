@@ -20,6 +20,7 @@
     <link href="css/nv.d3.min.css" rel="stylesheet" media="all">
     <link href="css/colorbrewer.css" rel="stylesheet" media="all">
     <link href="css/styles.css" rel="stylesheet" media="all">
+    <link href="css/extra-breast.css" rel="stylesheet" media="all" id="">
     <link href="css/font-awesome.min.css" rel="stylesheet" media="all">
 
     <link href='https://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
@@ -65,6 +66,16 @@
 
 	                <!-- The <article> element can be used to enclose content that still makes sense on its own and is therefore "reusable" -->
 	                <article id="introduction">
+	                	<select name="color" onchange="changeColor(this.value)">
+	                	</select>
+	                	<select name="cancer" onchange="setCancer(this.value)">
+	                		<option value="breast">Breast</option>
+	                		<option value="colon">Colon</option>
+	                	</select>
+	                	<select name="key" onchange="setKey(this.value)">
+	                		<option value="PERCENT_I">Invitation coverage</option>
+	                		<option value="PERCENT_T">Examination coverage</option>
+	                	</select>
 	                 	<div id="map">
 	                 	</div>
 	                </article>

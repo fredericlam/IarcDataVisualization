@@ -71,19 +71,7 @@
     	stroke-width: 0.5px ; 
     }
 
-    path#CODE_GB{
-        fill: transparent ;
-        stroke: none!important;
-    }
-
-    path#CODE_SE{
-        fill: transparent ;
-    }
-
-    path#CODE_RU,path#CODE_GE,path#CODE_AM,path#CODE_AZ{
-    	fill: transparent ;
-    	stroke: none!important ;
-    }
+    
 
     path#TXT_RU{
     	fill: transparent ;
