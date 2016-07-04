@@ -43,7 +43,7 @@
 	    <!-- ARIA: the landmark role "banner" is set as it is the prime heading or internal title of the page --> 
 	    <header role="banner">
 	    
-	        <h1>EU Breast cancer coverage screening (by tests) </h1>
+	        <h1>EU <span id="type_cancer"></span> cancer examination coverage screening in 2013</h1>
 	        
 	        <!-- ARIA: the landmark role "navigation" is added here as the element contains site navigation
 	        NOTE: The <nav> element does not have to be contained within a <header> element, even though the two examples on this page are. -->
@@ -66,16 +66,25 @@
 
 	                <!-- The <article> element can be used to enclose content that still makes sense on its own and is therefore "reusable" -->
 	                <article id="introduction">
-	                	<select name="color" onchange="changeColor(this.value)">
-	                	</select>
-	                	<select name="cancer" onchange="setCancer(this.value)">
-	                		<option value="breast">Breast</option>
-	                		<option value="colon">Colon</option>
-	                	</select>
-	                	<select name="key" onchange="setKey(this.value)">
-	                		<option value="PERCENT_I">Invitation coverage</option>
-	                		<option value="PERCENT_T">Examination coverage</option>
-	                	</select>
+	                	
+                        <div id="filters">
+                            <select name="cancer" onchange="setCancer(this.value)">
+                                <option value="breast">Breast</option>
+                                <option value="colon">Colorectal</option>
+                                <option value="cervix">Cervix</option>
+                            </select>
+                            <!--<select name="key" onchange="setKey(this.value)">
+                                <option value="PERCENT_I">Invitation coverage</option>
+                                <option value="PERCENT_T">Examination coverage</option>
+                            </select>-->
+                            <select name="color" onchange="changeColor(this.value)">
+                            </select>
+                            <select name="crc_mode" onchange="setKey(this.value)">
+                                <option value="PERCENT_T">50-74</option>
+                                <option value="PERCENT_T_SPECIFIC">Program specific age range</option>
+                            </select>
+                        </div>
+                        <!--<p>This map shows the screening programmes in Europe in 2013, by invitation coverage and examination coverage. Please use the selectbox to choose a cance site. </p>-->
 	                 	<div id="map">
 	                 	</div>
 	                </article>
@@ -89,11 +98,17 @@
 	        element, it is not part of it -->
 	        <!-- ARIA: the landmark role "complementary" is added here as it contains supporting information for the main content that remains meaningful even when separated from it -->
 	        <aside role="complementary">
-	        
-	            
+	           <!--<h2> About the data </h2>
+	           <h3> </h3>-->
+               <p> </p> 
 	        </aside>
 	        
 	    </div>
+        
+        <div class="description">
+            
+            
+        </div>
 
 	</div>
     

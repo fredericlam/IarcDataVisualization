@@ -94,6 +94,14 @@
 		position: relative;
 	}
 	
+    
+    #filters{
+        width: 440px ; 
+        margin: auto ; 
+        margin-top: 15px ; 
+        margin-bottom: 15px ; 
+    }
+
 	.tooltip:hover:after{
 		background: rgba(230,232,183,1);
 		border-radius: 4px;
@@ -118,3 +126,18 @@
 		position: absolute;
 		z-index: 99;
 	}
+
+    path#CODE_MT{
+        transform:translate(-2530px,-3250px)scale(5);
+        stroke-width: .1px;
+    }  
+    path.portugal_regions.region_1{
+        transform:translate(-500px,-1750px)scale(3);
+    }
+    path.portugal_regions.region_2{
+        transform:translate(-140px,-1600px)scale(3);
+    }
+
+    select[name="crc_mode"]{
+        display: none ; 
+    }

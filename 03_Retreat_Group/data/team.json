@@ -30,7 +30,9 @@
     { "id" : 22 , "name":"Eric","group":4},
     { "id" : 23 , "name":"Murielle","group":4},
     { "id" : 24 , "name":"Anastasia","group":4},
-    { "id" : 25 , "name":"Jerome","group":4}   
+    { "id" : 25 , "name":"Jerome","group":4},   
+      
+    { "id" : 26 , "name":"Chelle","group":4} 
   ],
   "links":[
     {"source":1,"target":0,"value":1},
@@ -53,6 +55,11 @@
     {"source":25,"target":10,"value":1},
       
     {"source":23,"target":8,"value":1},
-    {"source":24,"target":8,"value":1}
+    {"source":24,"target":8,"value":1}, 
+      
+    {"source":24,"target":7,"value":1},
+    {"source":24,"target":7,"value":1},
+    {"source":24,"target":7,"value":1},
+    {"source":24,"target":7,"value":1}
   ]
 }

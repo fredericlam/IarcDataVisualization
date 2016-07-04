@@ -10,5 +10,5 @@
 
     path#CODE_RU,path#CODE_GE,path#CODE_AM,path#CODE_AZ{
     	fill: transparent ;
-    	stroke: none!important ;
+    	/*stroke: none!important ;*/
     }

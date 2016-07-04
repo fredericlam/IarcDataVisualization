@@ -24,7 +24,7 @@
 	  
 	var json_file = 'general' ; // general , maskline_general
 
-	var key_val = 'PERCENT_I' ; 
+	var key_val = 'PERCENT_T' ; 
 
     var color_no_data = '#cccccc' ; 
 
@@ -33,7 +33,7 @@
     var data ; 
 
     // global 
-    var europe , data_breast , data_colon , sweden , uk , belgium , portugal ;
+    var europe , data_breast , data_colon , data_cervix , sweden , uk , belgium , portugal ;
 
     var range_colors ; 
 
@@ -44,6 +44,16 @@
         3 : { 'name' : 'Sydöstra sjukvårdsregionen' } , 
         4 : { 'name' : 'Västra sjukvårdsregionen' } , 
         5 : { 'name' : 'Södra sjukvårdsregionen' }
+    } ; 
+
+    var portugal_regions = {
+        0 : { 'name' : 'Algarve' } , 
+        1 : { 'name' : 'Azores' } , 
+        2 : { 'name' : 'Madeira' } , 
+        3 : { 'name' : 'Alentejo' } , 
+        4 : { 'name' : 'Norte' } , 
+        5 : { 'name' : 'Centro' }, 
+        6 : { 'name' : 'Lisboa' }
     } ; 
 
     var quantize ; 
@@ -91,15 +101,17 @@
 		.defer( d3.json , "data/europe.topojson" )
 	    .defer( d3.csv , "data/coverage-breast-cancer-screening.csv" )
         .defer( d3.csv , "data/coverage-colon-cancer-screening.csv" )
+        .defer( d3.csv , "data/coverage-cervix-cancer-screening.csv")
         .defer( d3.json , "data/sweden-counties.topojson" )
         .defer( d3.json , "data/uk.topojson" )
         .defer( d3.json , "data/belgium.json" )
         .defer( d3.json , "data/portugal.json")
-	    .await( function( error , europe_p , data_breast_p , data_colon_p , sweden_p , uk_p , belgium_p , portugal_p ) { 
+	    .await( function( error , europe_p , data_breast_p , data_colon_p ,  data_cervix_p ,  sweden_p , uk_p , belgium_p , portugal_p ) { 
     	
         europe = europe_p ; 
         data_breast = data_breast_p ; 
         data_colon = data_colon_p ; 
+        data_cervix = data_cervix_p ; 
         sweden = sweden_p ; 
         uk = uk_p ; 
         belgium = belgium_p
@@ -112,7 +124,7 @@
         initMap();
     	setData();
         runGradient() ; 
-
+        updateTitle();
     });
 
 function setColor( c )
@@ -142,7 +154,8 @@ function initMap()
                 }
             return 'country '+extra_css.replace('#','');
         })
-        .attr('title',function(d){ 
+        .append('title')
+        .text( function(d){ 
             if ( d.properties == undefined ) return ; 
             return d.properties.NAME ; 
         })
@@ -180,6 +193,11 @@ function initMap()
         .attr("d", path)
         .attr('class',function(d,i){
             return "portugal_regions region_"+i   ; 
+        })
+        .append('title')
+        .text(function(d,i){ 
+            if ( portugal_regions[i] != undefined && portugal_regions[i].name != undefined ) 
+                return portugal_regions[i].name ; 
         })
     ;
 
@@ -231,6 +249,8 @@ function setData()
         data = data_breast ; 
     else if ( cancer == 'colon')
         data = data_colon ; 
+     else if ( cancer == 'cervix')
+        data = data_cervix ; 
 }
 
 function runGradient()
@@ -461,11 +481,30 @@ function setKey( new_key )
 {
     key_val = new_key ; 
     runGradient() ; 
+    updateTitle();
 }
+
 
 function setCancer( new_cancer)
 {
     cancer = new_cancer ; 
+
+    if ( cancer == "colon")
+    {
+        $('select[name="crc_mode"]').show();
+    }
+    else
+    {
+        $('select[name="crc_mode"]').hide();
+    }
+
     setData();
     runGradient() ; 
+    updateTitle();
+}
+
+function updateTitle()
+{
+    $('#type_screening').text( '(' + $('select[name="key"] option:selected').text() +')' ) ; 
+    $('#type_cancer').text( $('select[name="cancer"] option:selected').text() ) ; 
 }
