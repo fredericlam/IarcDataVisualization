@@ -24,9 +24,11 @@
 	  
 	var json_file = 'general' ; // general , maskline_general
 
-	var key_val = 'PERCENT_T' ; 
+	//var key_val = 'PERCENT_T' ; 
+    var key_val = 'BREAST' ; 
 
     var color_no_data = '#cccccc' ; 
+    var color_no_programme = '#ffffff' ; 
 
     var cancer = 'breast' ; 
 
@@ -82,7 +84,7 @@
         20 : { 'code' : 'O' , 'name' : 'Västra Götaland County', 'region' : 4 } 
     } ; 
 
-    var g_general , g_sweden , g_portugal , g_belgium , g_uk ; 
+    var g_general , g_sweden , g_portugal , g_belgium , g_uk, g_data ; 
 
     
 
@@ -92,35 +94,40 @@
         if ( item == 'Pastel2') continue ; 
         if ( item == 'Set2') continue ; 
         if ( item == 'Set3') continue ; 
-        if ( item == 'Reds') var selected = 'selected="selected"' ; 
+        if ( item == 'Blues') var selected = 'selected="selected"' ; 
         else  var selected = '' ; 
         $('select[name="color"]').append( '<option value="'+item+'" '+selected+'>'+item+'</option>' ); 
     }
 
 	queue()
 		.defer( d3.json , "data/europe.topojson" )
-	    .defer( d3.csv , "data/coverage-breast-cancer-screening.csv" )
+	    /*.defer( d3.csv , "data/coverage-breast-cancer-screening.csv" )
         .defer( d3.csv , "data/coverage-colon-cancer-screening.csv" )
-        .defer( d3.csv , "data/coverage-cervix-cancer-screening.csv")
+        .defer( d3.csv , "data/coverage-cervix-cancer-screening.csv")*/
         .defer( d3.json , "data/sweden-counties.topojson" )
         .defer( d3.json , "data/uk.topojson" )
         .defer( d3.json , "data/belgium.json" )
         .defer( d3.json , "data/portugal.json")
-	    .await( function( error , europe_p , data_breast_p , data_colon_p ,  data_cervix_p ,  sweden_p , uk_p , belgium_p , portugal_p ) { 
+        .defer( d3.csv , "data/data.csv" )
+	    .await( function( error , europe_p , /* data_breast_p , data_colon_p ,  data_cervix_p ,*/  sweden_p , uk_p , belgium_p , portugal_p , data_d ) { 
     	
         europe = europe_p ; 
-        data_breast = data_breast_p ; 
+        
+        /*data_breast = data_breast_p ; 
         data_colon = data_colon_p ; 
-        data_cervix = data_cervix_p ; 
+        data_cervix = data_cervix_p ;*/ 
+        
         sweden = sweden_p ; 
         uk = uk_p ; 
         belgium = belgium_p
         portugal = portugal_p ;
+        g_data = data_d ; 
     	
     	// range_colors.unshift('#ffffff') ;
     	// range_colors[0] = '#ffffff' ; // 0 or no value means no data = grey 
 
-        setColor('Reds') ; 
+        // console.info( g_data ) ; 
+        setColor('Blues') ; 
         initMap();
     	setData();
         runGradient() ; 
@@ -130,7 +137,8 @@
 function setColor( c )
 {
     range_colors  = Array.prototype.slice.call( colorbrewer[ c ][ 9 ] ) ;  
-    quantize = d3.scale.quantize().domain( [0,100] ).range( range_colors ) ;
+    range_colors.shift(); 
+    quantize = d3.scale.quantize().domain( [0,90] ).range( range_colors ) ;
 }
 
 
@@ -145,19 +153,19 @@ function initMap()
         .attr("d", path)
         .attr('id',function(d){ return 'CODE_' + d.id ; })
         .attr('class',function(d){ 
-            var extra_css = '' ; 
+            /*var extra_css = '' ; 
             for( var item in data )
                 if ( data[item].CODE == d.id )
                 {
                     extra_css = quantize(data[item][key_val]) ;
                     break ; 
                 }
-            return 'country '+extra_css.replace('#','');
+            return 'country '+extra_css.replace('#','');*/
         })
         .append('title')
         .text( function(d){ 
             if ( d.properties == undefined ) return ; 
-            return d.properties.NAME ; 
+            return d.properties.NAME + ' ' + d.id ; 
         })
     ;
 
@@ -213,7 +221,7 @@ function initMap()
         .attr('fill',function(d,i){
             var id_subunit = d.id ;
 
-            for( var item in data )
+            /*for( var item in data )
             {
                 if ( data[item].CODE == 'GB' )
                 {
@@ -224,7 +232,7 @@ function initMap()
                         return quantize( data[item][key_val] );
                     }
                 }
-            }
+            }*/
 
             return color_no_data ; 
         })
@@ -244,13 +252,14 @@ function initMap()
 
 function setData()
 {
+    data = g_data  ;
     // console.info( topology.objects ) ; 
-    if ( cancer == 'breast')
+    /*if ( cancer == 'breast')
         data = data_breast ; 
     else if ( cancer == 'colon')
         data = data_colon ; 
      else if ( cancer == 'cervix')
-        data = data_cervix ; 
+        data = data_cervix ;*/
 }
 
 function runGradient()
@@ -263,9 +272,10 @@ function runGradient()
             for( var item in data )
                 if ( data[item].CODE == d.id )
                 {
-                    if ( data[item][key_val] == 0 ) return color_no_data ; 
-                    
-                    // console.info( d.id ,  data[item][key_val] , quantize(data[item][key_val]) );
+                    if ( data[item][key_val] == 'WHITE') return color_no_programme ; 
+                    else if ( data[item][key_val] == 'GRAY') return color_no_data ; 
+
+                    // console.info( d.id ,  data[item][key_val] , data[item] ,  quantize(data[item][key_val]) );
                     return quantize( data[item][key_val] );
                 }
 
@@ -283,8 +293,10 @@ function runGradient()
             {
                 if ( data[item].CODE == 'SE' )
                 {
-                    if ( data[item].CODE_REGION == id_region )
+                    if ( data[item].CODE_REGION == id_region && data[item].REGION == 1 )
                     {
+                        if ( data[item][key_val] == 'WHITE') return color_no_programme ; 
+                        else if ( data[item][key_val] == 'GRAY') return color_no_data ; 
                         return quantize( data[item][key_val] );
                     }
                 }
@@ -299,8 +311,11 @@ function runGradient()
             {
                 if ( data[item].CODE == 'SE' )
                 {
-                    if ( data[item].CODE_REGION == id_region )
+                    if ( data[item].CODE_REGION == id_region && data[item].REGION == 1 )
                     {
+                        if ( data[item][key_val] == 'WHITE') return color_no_programme ; 
+                        else if ( data[item][key_val] == 'GRAY') return color_no_data ; 
+
                         return quantize( data[item][key_val] );
                     }
                 }
@@ -320,8 +335,11 @@ function runGradient()
             {
                 if ( data[item].CODE == 'BE' )
                 {
-                    if ( data[item].CODE_REGION == i )
+                    if ( data[item].CODE_REGION == i && data[item].REGION == 1 )
                     {
+                        if ( data[item][key_val] == 'WHITE') return color_no_programme ; 
+                        else if ( data[item][key_val] == 'GRAY') return color_no_data ; 
+                        
                         return quantize( data[item][key_val] );
                     }
                 }
@@ -344,6 +362,9 @@ function runGradient()
                     //if ( data[item][key_val] == 0 ) return no
                     if ( data[item].CODE_REGION == i )
                     { 
+                        if ( data[item][key_val] == 'WHITE') return color_no_programme ; 
+                        else if ( data[item][key_val] == 'GRAY') return color_no_data ; 
+
                         return quantize( data[item][key_val] );
                     }
                 }
@@ -366,6 +387,9 @@ function runGradient()
                     if ( data[item].CODE_REGION == id_subunit )
                     {
                         // if ( Math.abs( data[item][key_val] ) == 0 ) return "#cccccc" ; 
+
+                        if ( data[item][key_val] == 'WHITE') return color_no_programme ; 
+                        else if ( data[item][key_val] == 'GRAY') return color_no_data ; 
 
                         return quantize( data[item][key_val] );
                     }
@@ -413,7 +437,7 @@ function buildLegend()
         .attr('class','rect_Legend')
         .attr("x", 100 ) 
         .attr("y", function(d, i) {
-            lastYRect = (i * 15) + 2 + 400 ;
+            lastYRect = (i * 15) + 2 + 450 ;
             return lastYRect ; 
         })
        .attr("width", 25 )
@@ -434,12 +458,23 @@ function buildLegend()
         .style("stroke-width", "0.5px")
         .style("fill", function(d){ return color_no_data ;})
 
+    legend
+        .append('rect')
+        .attr('class','rect_Legend')
+        .attr("x", 100 ) 
+        .attr("y", lastYRect + 30 )
+        .attr("width", 25 )
+        .attr("height", 10 )
+        .style("stroke","#cccccc")
+        .style("stroke-width", "0.5px")
+        .style("fill", function(d){ return color_no_programme ;})
+
     legendEntries
         .append('text')
         .attr('class','text_Legend')
         .attr("x",  140 )  // leave 5 pixel space after the <rect>
         .attr("y", function(d, i) {
-           lastYText =  (i * 15) + 400  ; // + (CanMapHeight - 200);
+           lastYText =  (i * 15) + 450  ; // + (CanMapHeight - 200);
            return lastYText ; 
         })
         .style('font-size','12px')
@@ -452,7 +487,8 @@ function buildLegend()
             var format = d3.format("0f") ;
 
             if ( i == 0 )
-                return format(extent[0])+ "%–" + format(extent[1])+'%' ;
+                // return format(extent[0])+ "%–" + format(extent[1])+'%' ;
+                return format(extent[0])+ "%–100%" ;
             else if (i == (data_colors.length-1) )
                 return format(extent[0])+ "%–" + format(extent[1])+'%' ;
             else
@@ -469,6 +505,33 @@ function buildLegend()
         .style('font-size','12px')
         .attr("dy", "0.9em") // place text one line *below* the x,y point
         .text("No data") ;
+
+    legend
+        .append('text')
+        .attr('class','text_Legend')
+        .attr("x",  140 )  // leave 5 pixel space after the <rect>
+        .attr("y", lastYText + 30 )  // + (CanMapHeight - 200);})
+        .style('font-size','12px')
+        .attr("dy", "0.9em") // place text one line *below* the x,y point
+        .text("Planning population-based programme,") ;
+
+    legend
+        .append('text')
+        .attr('class','text_Legend')
+        .attr("x",  140 )  // leave 5 pixel space after the <rect>
+        .attr("y", lastYText + 45 )  // + (CanMapHeight - 200);})
+        .style('font-size','12px')
+        .attr("dy", "0.9em") // place text one line *below* the x,y point
+        .text("non-population based programme,") ;
+
+    legend
+        .append('text')
+        .attr('class','text_Legend')
+        .attr("x",  140 )  // leave 5 pixel space after the <rect>
+        .attr("y", lastYText + 60 )  // + (CanMapHeight - 200);})
+        .style('font-size','12px')
+        .attr("dy", "0.9em") // place text one line *below* the x,y point
+        .text("no programme") ;
 }
 
 function changeColor( new_color )
@@ -488,19 +551,23 @@ function setKey( new_key )
 function setCancer( new_cancer)
 {
     cancer = new_cancer ; 
+    key_val = new_cancer ; 
 
-    if ( cancer == "colon")
+    /*if ( cancer == "colon")
     {
         $('select[name="crc_mode"]').show();
     }
     else
     {
         $('select[name="crc_mode"]').hide();
-    }
+    }*/
 
     setData();
     runGradient() ; 
     updateTitle();
+
+    // update class of svg
+    $('svg').attr('class', new_cancer ) ; 
 }
 
 function updateTitle()
