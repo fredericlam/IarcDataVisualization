@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+ 
+  <head>
+  
+	<link rel="icon" href="favicon.ico" />
+    <style>
+      rect.bordered {
+        stroke: #303030;
+        stroke-width:0.5px;   
+      }
+	  
+	  rect.highlighted {
+		stroke: #F00;
+        stroke-width:1px;
+	  }
+	  
+      text.mono {
+        font-size: 9pt;
+        font-family:  sans-serif;
+        fill: #000000;
+		shape-rendering: crispEdges;
+      }
+
+      text.axis-workweek {
+        fill: #000;
+      }
+
+      text.axis-worktime {
+        fill: #000;
+      }
+	  
+	  text.text-highlight_green {
+        fill: #1b7415;
+      }
+	  
+	  text.text-highlight_orange {
+        fill: #f23407;
+      }
+	  
+	  text.text-highlight_blue {
+        fill: #0041DB;
+      }
+	  
+	  
+	  .xaxis path,
+	  .xaxis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+
+	.xaxis text {
+		font-family: sans-serif;
+		font-size: 11px;
+	}
+	
+
+
+
+
+    </style>
+	<title> CI5 comparaison </title>
+	<script type="text/javascript" src="d3/d3.v3.min.js"></script>
+	
+	
+		<script type="text/javascript">
+		
+		// variable general
+		
+	var margin = { top: 100, right: 200, bottom: 100, left: 300, top_page: 50, left_page: 400 },
+	width = 1500 - margin.left - margin.right,
+	height = 800 - margin.top - margin.bottom,
+	XgridSize = Math.floor(width / 75),
+	YgridSize = Math.floor(height / 35);
+
+	var nb_registry = 13;
+		
+	var yScale = d3.scale.linear()
+		.domain([1, 32])
+		.range([0  ,(32-1)* YgridSize ]);
+
+	
+	var xScale = d3.scale.linear()
+		.domain([0, 90])
+		.range([0  ,20* XgridSize]);
+	
+	var xAxis = d3.svg.axis() 
+		.scale(xScale)
+		.orient("bottom");
+												 
+	 window.onload = function()
+		{
+		load_data()
+		
+	};
+	
+	
+    function load_data() // generate heatmap 
+	{ 	
+		var file_use = "data/CI5IvsCI5X.csv"; 
+		
+	
+
+		d3.csv(file_use,
+			
+			function(d) {
+			return {
+				
+				rank : +d.rank,
+				cancer_label : d.cancer_label,
+				cancer: +d.cancer,
+				volume : +d.volume,
+				sex : +d.sex,
+				per1: d.per1,
+				per2: d.per2,
+				asr: +d.asr,
+				country_label: d.country_label,
+				country_code: +d.country_code
+
+				
+				
+				};	
+			},		
+			function(data) {
+			
+				populateComboRegistry(data);
+				var data1 = data.filter(function(d){
+					return (d.volume == 1 & d.country_code == 124 & d.sex == 1  )
+				});
+				
+				var data2 = data.filter(function(d){
+					return (d.volume == 10 & d.country_code == 124 & d.sex == 1  )
+				});
+				
+				var data_temp = data.filter(function(d){
+					return (d.country_code == 124 & d.sex == 1  )
+				});
+				
+				var data_cancer1=d3.nest()
+						.key(function(d) {return d.cancer;})
+						.sortKeys(d3.ascending)
+						.entries(data1)
+				
+				var data_cancer2=d3.nest()
+						.key(function(d) {return d.cancer;})
+						.sortKeys(d3.ascending)
+						.entries(data2)
+						
+				var data_link=d3.nest()
+						.key(function(d) {return d.cancer;})
+						.sortKeys(d3.ascending)
+						.key(function(d) {return d.volume;})
+						.sortKeys(d3.ascending)
+						.entries(data_temp)
+					
+		var bar_graph1 = d3.select("#chart").append("svg") // draw main windows
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("class", "bar_graph1")	
+			.attr("transform", "translate(" + margin.left_page   + "," + margin.top_page  + ")"); 
+			
+		bar_graph1.append("g") // draw axis
+			.attr("class", "xaxis")
+			.attr("transform", "translate(" + (0)+ "," + (yScale(17.4)) + ")")
+			.call(xAxis);
+			
+		var bar_graph2 = d3.select("#chart").selectAll("svg") // draw second bar 
+			.append("g")
+			.attr("class", "bar_graph2")	
+			.attr("transform", "translate(" +(1000)   + "," + margin.top_page  + ")"); 
+			
+		bar_graph2.append("g") // draw axis
+			.attr("class", "xaxis")
+			.attr("transform", "translate(" + (0)+ "," + (yScale(17.4)) + ")")
+			.call(xAxis);
+			
+			var line_link =  bar_graph1.selectAll()
+				.data(data_link)
+				.enter()
+				.append("g")
+				.attr("class", function(d,i) { 
+					return "link1 " + d.key;})
+				.attr("transform",function(d,i) {
+					var rank = d.values[0].values[0].rank
+					return "translate(0," + yScale(rank + (0.7*(rank-1))) + ")";
+					})
+				.attr("opacity" ,function(d,i) {
+					var rank1 = d.values[0].values[0].rank
+					var rank2 = d.values[1].values[0].rank
+					var rank_min = Math.min(rank1,rank2)
+					if (rank_min < 11) {
+						return 1;
+						}
+					else {
+						return 0;
+					}
+				})
+	
+
+ 			line_link.append("line")
+				.attr("class","line_link")
+				.attr("x1", 20* XgridSize) 
+				.attr("y1",  YgridSize/2)
+				.attr("x2",  600-(20* XgridSize))
+				.attr("y2", yScale(-3+(0.7*(-3-1)))+YgridSize/2)
+				.attr("y2",function(d,i) {
+					var rank1 = d.values[0].values[0].rank
+					var rank2 = d.values[1].values[0].rank
+					var rank_diff = (rank2-rank1)+1
+					console.log(d.values[0].values[0].cancer_label)
+					console.log(rank_diff)
+					return yScale(rank_diff+(0.7*(rank_diff-1)))+YgridSize/2;
+					})
+				.attr("stroke-width", 0.5)
+				.attr("stroke", "red");
+			  
+				
+			
+			var bar1 = bar_graph1.selectAll() // make 1 group for each cancer sites 
+				.data(data_cancer1)
+				.enter()
+				.append("g")
+				.attr("class", function(d,i) { return "bar1 " + d.key;})
+				.attr("transform",function(d,i) {
+				var rank = d.values[0].rank
+				return "translate(0," + yScale(rank + (0.7*(rank-1))) + ")";
+				})
+			  .attr("opacity" ,function(d,i) {
+				var rank = d.values[0].rank
+				if (rank < 11) {
+					return 1;
+					}
+				else {
+					return 0;
+				}
+			  });
+	
+			 bar1.selectAll("text")// add label for each group
+			  .data(function(d) {return d.values})	
+			  .enter()	
+			  .append("text")
+			  .attr("text-anchor", "end")
+			  .attr("transform",function(d,i) {return "translate(" +(-5) + "," +YgridSize/1.5 + ")";})
+			  .text(function(d) {return d.cancer_label;});
+			  
+
+				
+			bar1.selectAll("rect") // draw each rectangle in the group
+			  .data(function(d) {return d.values})
+			  .enter()	
+			  .append("rect")
+			  .classed("bordered", true)
+			  .attr("x", 0)
+			  .attr("y", 0)
+			  .attr("rx", 0)
+			  .attr("ry", 0)
+			  .attr("width", function(d,i) { 
+				return xScale(d.asr);})
+			  .attr("height", YgridSize)
+			  .attr("fill", "#01ACE9")
+			  
+			bar1.selectAll("line") // add line for each group
+				.data(function(d) {return d.values})
+				.enter()	
+				.append("line")
+				.attr("class","line1")
+				.attr("x1", function(d,i) { 
+					return xScale(d.asr)+5;})
+				.attr("y1", function(d,i) {return YgridSize/2;})
+				.attr("x2",  20* XgridSize)
+				.attr("y2", function(d,i) {return YgridSize/2;})
+				.attr("stroke-width", 0.5)
+				.attr("stroke", "black");
+			  
+
+			  
+			  var bar2 = bar_graph2.selectAll() // make 1 group for each cancer sites 
+				.data(data_cancer2)
+				.enter()
+				.append("g")
+				.attr("class", function(d,i) { return "bar2 " + d.key;})
+				.attr("transform",function(d,i) {
+				var rank = d.values[0].rank
+				return "translate(0," + yScale(rank + (0.7*(rank-1))) + ")";
+				})
+			  .attr("opacity" ,function(d,i) {
+				var rank = d.values[0].rank
+				if (rank < 11) {
+					return 1;
+					}
+				else {
+					return 0;
+				}
+			  });
+	
+			 bar2.selectAll("text")// add label for each group
+			  .data(function(d) {return d.values})	
+			  .enter()	
+			  .append("text")
+			  .attr("id", function(d, i) { 
+				return d.cancer_label;})
+			  .attr("text-anchor", "end")
+			  .attr("transform",function(d,i) {return "translate(" +(-5) + "," +YgridSize/1.5 + ")";})
+			  .text(function(d) {return d.cancer_label;});
+				
+			bar2.selectAll("rect") // draw each rectangle in the group
+			  .data(function(d) {return d.values})
+			  .enter()	
+			  .append("rect")
+			  .classed("bordered", true)
+			  .attr("x", 0)
+			  .attr("y", 0)
+			  .attr("rx", 0)
+			  .attr("ry", 0)
+			  .attr("width", function(d,i) { return xScale(d.asr);})
+			  .attr("height", YgridSize)
+			  .attr("fill", "#01ACE9")
+			  
+			bar2.selectAll("line") // add line for each group
+				.data(function(d) {return d.values})
+				.enter()	
+				.append("line")
+				.attr("x1", -20* XgridSize)
+				.attr("y1", function(d,i) {return YgridSize/2;})
+				.attr("x2", function(d,i) {
+						var temp = document.getElementById(d.cancer_label).getBBox().width;
+						return (temp*-1)-10;
+				})
+				.attr("y2", function(d,i) {return YgridSize/2;})
+				.attr("stroke-width", 0.5)
+				.attr("stroke", "black");
+		
+			}
+		);
+	}
+	
+	
+	function update(data) {
+	
+		var data1 = data.filter(function(d){
+			return (d.volume == 1)
+			});
+		
+		var data2 = data.filter(function(d){
+			return (d.volume == 10)
+			});
+			
+		var data_cancer1=d3.nest()
+			.key(function(d) {return d.cancer;})
+			.sortKeys(d3.ascending)
+			.entries(data1)
+			
+		var data_cancer2=d3.nest()
+			.key(function(d) {return d.cancer;})
+			.sortKeys(d3.ascending)
+			.entries(data2)
+			
+		var data_test=d3.nest()
+			.key(function(d) {return d.cancer_label;})
+			.key(function(d) {return d.volume;})
+			.sortKeys(d3.ascending)
+			.entries(data)
+			
+
+			
+		var bar_graph1 = d3.select("#chart").select(".bar_graph1").selectAll("rect")
+					.data(data_cancer1)// draw main windows
+						
+		var bar_graph2 = d3.select("#chart").select(".bar_graph2").selectAll("rect")
+			.data(data_cancer2)// draw main windows
+					
+		var bar1 = d3.select("#chart").selectAll(".bar1")
+			.data(data_cancer1)
+				
+		var bar2 = d3.select("#chart").selectAll(".bar2")
+			.data(data_cancer2)
+		
+		var x_max1 = d3.max(data1, function(d) {return d.asr})
+		var x_max2 = d3.max(data2, function(d) {return d.asr})
+		var x_max = Math.max(x_max1,x_max2)
+		var log_max = Math.pow(10,Math.floor(Math.log10(x_max)));
+		var unit_floor_max = Math.floor(x_max/log_max)
+
+		var tick_space = 0;
+		if (unit_floor_max < 2) {
+			tick_space = 0.2*log_max;	
+		}
+		else {
+			if (unit_floor_max < 5) {
+				tick_space = 0.5*log_max;
+				}
+			else {
+			tick_space = log_max;
+			}
+		}
+		var x_top = Math.ceil(x_max/tick_space)*tick_space;
+
+		
+		xScale.domain([0, x_top]);
+		
+		d3.select("#chart")
+		   .selectAll(".xaxis")
+           .transition().duration(1500).ease("sin-in-out")  // https://github.com/mbostock/d3/wiki/Transitions#wiki-d3_ease
+           .call(xAxis);  
+		  
+		bar1.transition().duration(1000)	
+		  .attr("transform",function(d,i) {
+		  var rank = d.values[0].rank
+		  return "translate(0," + yScale(rank + (0.7*(rank-1))) + ")";
+		  })
+		  .attr("opacity" ,function(d,i) {
+			var rank = d.values[0].rank
+			if (rank < 11) {
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		  });
+		  	
+
+ 		d3.select("#chart").selectAll(".line1")
+		  .data(data_cancer1)
+		  .transition().duration(1000)	
+		  .attr("x1", function(d,i) {return xScale(d.values[0].asr)+5;});
+		  
+		bar1.selectAll("rect")
+		  .transition().duration(1000)	
+		  .attr("width", function(d,i) { 
+			return xScale(d.values[0].asr);})
+
+		bar2.transition().duration(1000)	
+		  .attr("transform",function(d,i) {
+		  var rank = d.values[0].rank
+		  return "translate(0," + yScale(rank + (0.7*(rank-1))) + ")";
+		  })
+		  .attr("opacity" ,function(d,i) {
+			var rank = d.values[0].rank
+			if (rank < 11) {
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		  });
+
+		bar2.selectAll("rect")
+		  .attr("width", function(d,i) { 
+			return xScale(d.values[0].asr);})
+	
+	}
+	
+
+	
+	
+	var populateComboRegistry = function(data) {
+		
+			var datatemp = data.filter(function(d){
+			return (d.volume == 1 & d.sex == 1 & d.rank == 1)
+			});
+
+			var registry_list = {};
+			for (i=0;i<nb_registry; i++ ) {
+				registry_list[datatemp[i].country_label]=datatemp[i].country_code;
+			}
+
+			country_text = Object.keys(registry_list);
+			country_text.sort();
+				
+			var select  = document.getElementById("countryList")
+			
+			for (i=0; i < nb_registry; i++ ) {
+				var el = document.createElement("option");
+				var temp=country_text[i]
+				el.textContent = temp;
+				el.value =registry_list[temp];
+				select.appendChild(el);
+			}
+		}
+		
+	function combo_registry(thelist)
+	    {
+		
+		var file_use = "data/CI5IvsCI5X.csv"; 
+
+			d3.csv(file_use,
+				function(d) {
+				return {
+					
+					rank : +d.rank,
+					cancer_label : d.cancer_label,
+					cancer: +d.cancer,
+					volume : +d.volume,
+					sex : +d.sex,
+					per1: d.per1,
+					per2: d.per2,
+					asr: +d.asr,
+					country_label: d.country_label,
+					country_code: +d.country_code
+
+					
+					
+					};	
+				},		
+				function(data) {
+		
+				var idx_1 = thelist.selectedIndex;
+				country_select = thelist.options[idx_1].value;
+				
+				var datatemp = data.filter(function(d){
+					return (d.country_code == country_select & d.sex == 1)
+				});
+				
+				update(datatemp)
+				
+				}
+
+			)
+
+			
+		}
+		
+			
+	</script >
+	
+	 
+	</head>
+  	
+	<body>
+	
+		
+		<select name="country_select" id="countryList" onChange="combo_registry(this)">
+		 <option value=0>Select a registry</option>
+		</select> 
+		
+		<div id="chart"></div>
+		
+
+
+ 
+
+  
+</body>
+ 
+</html>
+	
