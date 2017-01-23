@@ -51,14 +51,17 @@
 	  .xaxis line {
 			fill: none;
 			stroke: black;
-			shape-rendering: crispEdges;
 		}
 		
 	
 
 	.xaxis text {
 		font-family: sans-serif;
-		font-size: 11px;
+		font-size: 14px;
+	}
+	
+	.tick line{
+		opacity: 0.4;
 	}
 	
 
@@ -89,14 +92,20 @@
 		.domain([1, 32])
 		.range([0  ,(32-1)* YgridSize ]);
 
-	
+
+			
 	var xScale = d3.scale.linear()
 		.domain([0, 100])
 		.range([0  ,20* XgridSize]);
 	
+	var graph_height = yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2
 	var xAxis = d3.svg.axis() 
 		.scale(xScale)
-		.orient("bottom");
+		.orient("bottom")
+		.tickSize(-graph_height-20, 0,0)
+		.tickPadding(8)
+		.tickValues([0, 20, 40, 60, 80, 100]);
+		
 		
 												 
 	 window.onload = function()
@@ -289,7 +298,7 @@
 				.attr("ry", 0)
 				.attr("width", function(d,i) {return xScale(d.asr);})
 				.attr("height", YgridSize)
-				.attr("fill", "#01ACE9")
+				.attr("fill", "#2c7bb6")
 			  
 			bar1.append("line")
 				.attr("class","line1")
@@ -352,7 +361,7 @@
 				.attr("ry", 0)
 				.attr("width", function(d,i) {return xScale(d.asr);})
 				.attr("height", YgridSize)
-				.attr("fill", "#01ACE9")
+				.attr("fill", "#2c7bb6")
 			  
 			bar2.append("line")
 				.attr("class","line2")
@@ -397,6 +406,30 @@
 		);
 	}
 	
+	function tick_generator(value_max)	{
+	
+		var log_max = Math.pow(10,Math.floor(Math.log10(value_max)));
+		var unit_floor_max = Math.floor(value_max/log_max)
+		var tick_space = 0;
+		if (unit_floor_max < 2) {
+			tick_space = 0.2*log_max;	
+		}
+		else {
+			if (unit_floor_max < 5) {
+				tick_space = 0.5*log_max;
+				}
+			else {
+			tick_space = log_max;
+			}
+		}
+		var value_top = Math.ceil(value_max/tick_space)*tick_space;
+		var tick_list = [];
+		for (var i = 0; i <= value_top; i += tick_space) {
+			tick_list.push(i);
+		}
+	return (tick_list)
+	}
+	
 	
 	function update(data) {
 	
@@ -423,27 +456,22 @@
 			
 		var link_line = d3.select("#chart").selectAll(".link1")
 			.data(data_nest)
+			
+
 		
 		var x_max = d3.max(data, function(d) {return d.asr})
-		var log_max = Math.pow(10,Math.floor(Math.log10(x_max)));
-		var unit_floor_max = Math.floor(x_max/log_max)
-
-		var tick_space = 0;
-		if (unit_floor_max < 2) {
-			tick_space = 0.2*log_max;	
-		}
-		else {
-			if (unit_floor_max < 5) {
-				tick_space = 0.5*log_max;
-				}
-			else {
-			tick_space = log_max;
-			}
-		}
-		var x_top = Math.ceil(x_max/tick_space)*tick_space;
-
+		var tick_list = tick_generator(x_max)
+		console.log(tick_list.length)
+		console.log(tick_list[tick_list.length-1])
 		
-		xScale.domain([0, x_top]);
+		xScale.domain([0, tick_list[tick_list.length-1]]);
+		
+		var xAxis = d3.svg.axis() 
+		.scale(xScale)
+		.orient("bottom")
+		.tickSize(-graph_height-20,0)
+		.tickPadding(8)
+		.tickValues(tick_list);
 		
 		d3.select("#chart")
 		   .selectAll(".xaxis")
@@ -506,7 +534,6 @@
 					var rank2 = d.values[1].values[0].rank
 					var rank_diff = (rank2-rank1)+1
 					if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-						console.log(rank1)
 						return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
 					}
 					else {
@@ -695,7 +722,6 @@ function wordwrap(text, max) {
 	
 		
 		<select name="country_select" id="countryList" onChange="combo_registry(this)">
-		 <option value=0>Select a registry</option>
 		</select> 
 		
 		<div id="chart"></div>
