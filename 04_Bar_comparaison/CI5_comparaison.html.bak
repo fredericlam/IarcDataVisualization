@@ -381,7 +381,7 @@
 				}
 			})
 			
- 		 d3.select("#chart").selectAll(".line_link")
+ 		 d3.select("#chart").selectAll(".link1")
 		  .data(data_nest)
 		  .transition().duration(1000)	
 		  .attr("y2", function(d,i) {
