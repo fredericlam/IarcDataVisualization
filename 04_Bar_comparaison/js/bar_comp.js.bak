@@ -35,6 +35,14 @@
 					return (d.country_code == 124 & d.sex == 1  )
 				});
 				
+				var data_period1 = data.filter(function(d){
+					return (d.country_code == 124 & d.sex == 1 & d.rank==1 & d.volume == 1 )
+				});
+				
+				var data_period2 = data.filter(function(d){
+					return (d.country_code == 124 & d.sex == 1 & d.rank==1 & d.volume == 10 )
+				});
+				
 				var data_nest=d3.nest()
 						.key(function(d) {return d.cancer;})
 						.sortKeys(d3.ascending)
@@ -49,21 +57,47 @@
 			.attr("class", "bar_graph1")	
 			.attr("transform", "translate(" + margin.left_page   + "," + margin.top_page  + ")"); 
 			
-		bar_graph1.append("g") // draw axis
-			.attr("class", "xaxis")
-			.attr("transform", "translate(" + (0)+ "," + (yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2) + ")")
-			.call(xAxis);
-			
+
 		var bar_graph2 = d3.select("#chart").selectAll("svg") // draw second bar 
 			.append("g")
 			.attr("class", "bar_graph2")	
 			.attr("transform", "translate(" +(graph_separation)   + "," + margin.top_page  + ")"); 
+
+		
+			bar_graph1.selectAll()
+			 .data(data_period1)
+			 .enter()
+			 .append("text")
+			 .attr("class", "bar_title") 
+			 .attr("text-anchor", "middle")
+			 .attr("x", 10* XgridSize)     // x position of the first end of the line
+			 .attr("y", -35)
+			 .text(function(d,i) { return d.per1 + " - " + d.per2 });
+			 
+			 			 
+		   bar_graph2.selectAll()
+			 .data(data_period2)
+			 .enter()
+			 .append("text")
+			 .attr("class", "bar_title") 
+			 .attr("text-anchor", "middle")
+			 .attr("x", 10* XgridSize)     // x position of the first end of the line
+			 .attr("y", -35)
+			 .text(function(d,i) { return d.per1 + " - " + d.per2 });
+			
+			 
+			 
+		bar_graph1.append("g") // draw axis
+			.attr("class", "xaxis")
+			.attr("transform", "translate(" + (0)+ "," + (yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2) + ")")
+			.call(xAxis);
 			
 		bar_graph2.append("g") // draw axis
 			.attr("class", "xaxis")
 			.attr("transform", "translate(" + (0)+ "," + (yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2) + ")")
 			.call(xAxis);
 			
+		
 			
 		var x_max = d3.max(data_temp, function(d) {return d.asr})
 		var tick_list = tick_generator(x_max)
@@ -94,7 +128,7 @@
 		   .attr("x2", function(d) { 
 			return xScale(d); })
 			
-		bar_graph1.selectAll().append("g")
+		bar_graph1.selectAll(".xaxis")
 		  .data(tick_list.minor, function(d) { return d; })
 		  .enter()
 		  .append("line")
@@ -129,8 +163,14 @@
 			.attr("class", function(d,i) { 
 				return "link1 " + d.key;})
 			.attr("transform",function(d,i) {
-				var rank = d.values[0].values[0].rank
-				return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var rank_min = Math.min(rank1,rank2)
+				if (rank_min < nb_cancer+1) {
+					return "translate(0," + yScale(rank1 + (bar_space*(rank1-1))) + ")";
+				} else {
+					return "translate(0," + yScale(11 + (bar_space*(10))) + ")";
+				}
 				})
 			.attr("opacity" ,function(d,i) {
 				var rank1 = d.values[0].values[0].rank
@@ -151,7 +191,7 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
-						return 580-(20* XgridSize);
+						return (graph_separation-margin.left_page)-(20* XgridSize)-30;
 					}
 					else {
 						return 20* XgridSize;
@@ -171,7 +211,7 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-						return 20* XgridSize+20;
+						return 20* XgridSize+30;
 					}
 					else {
 						return (graph_separation-margin.left_page)-(20* XgridSize);
@@ -180,9 +220,12 @@
 				.attr("y2",function(d,i) {
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
+					var rank_min = Math.min(rank1,rank2)
 					var rank_diff = (rank2-rank1)+1
 					if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
 						return yScale((nb_cancer+4-rank2)+(bar_space*(nb_cancer+4-rank2)))+YgridSize;
+					} else if (rank_min > nb_cancer) {
+						return YgridSize/2;
 					}
 					else {
 						return yScale(rank_diff+(bar_space*(rank_diff-1)))+YgridSize/2;
@@ -210,7 +253,11 @@
 				.attr("class", function(d,i) { return "bar1 " + d.key;})
 				.attr("transform",function(d,i) {
 				var rank = d.values[0].values[0].rank
-				return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+				if (rank < nb_cancer+1) {
+					return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+				} else {
+					return "translate(0," + yScale(11 + (bar_space*(10-1))) + ")";
+				}	
 				})
 			  .attr("opacity" ,function(d,i) {
 				var rank = d.values[0].values[0].rank
@@ -272,7 +319,11 @@
 				.attr("class", function(d,i) { return "bar2 " + d.key;})
 				.attr("transform",function(d,i) {
 				var rank = d.values[1].values[0].rank
-				return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+				if (rank < nb_cancer+1) {
+					return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+				} else {
+					return "translate(0," + yScale(11 + (bar_space*(10-1))) + ")";
+				}	
 				})
 			  .attr("opacity" ,function(d,i) {
 				var rank = d.values[1].values[0].rank
@@ -343,6 +394,24 @@
 			 .attr("y1", -20)      // y position of the first end of the line
 			 .attr("x2", 0)     // x position of the second end of the line
 			 .attr("y2", yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+8); 
+			 
+
+			bar_graph1.append("text")
+			 .attr("class", "xtitle") 
+			 .attr("text-anchor", "middle")
+			 .attr("x", 10* XgridSize)     // x position of the first end of the line
+			 .attr("y", yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+50)
+			 .text("Age standardized (W) incidence rate per 100,000");
+			 
+			 			 
+		    bar_graph2.append("text")
+			 .attr("class", "xtitle") 
+			 .attr("text-anchor", "middle")
+			 .attr("x", 10* XgridSize)     // x position of the first end of the line
+			 .attr("y", yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+50)
+			 .text("Age standardized (W) incidence rate per 100,000");
+			
+
 			
 
 		
@@ -396,6 +465,14 @@
 				.key(function(d) {return d.volume;})
 				.sortKeys(d3.ascending)
 				.entries(data)
+				
+			var data_period1 = data.filter(function(d){
+					return (d.rank==1 & d.volume == 1 )
+				});
+				
+			var data_period2 = data.filter(function(d){
+					return (d.rank==1 & d.volume == 10 )
+			});
 			
 
 			
@@ -413,6 +490,30 @@
 			
 		var link_line = d3.select("#chart").selectAll(".link1")
 			.data(data_nest)
+		
+		var title_period1 = d3.select("#chart").select(".bar_graph1").selectAll(".bar_title")
+			.data(data_period1)
+			
+		var title_period2 = d3.select("#chart").select(".bar_graph2").selectAll(".bar_title")
+			.data(data_period2)
+			
+			title_period1
+			.text(function(d,i) { return d.per1 + " - " + d.per2 });
+			
+			title_period2
+			.text(function(d,i) { return d.per1 + " - " + d.per2 });
+				
+			 
+			 			 
+		   bar_graph2.selectAll()
+			 .data(data_period2)
+			 .enter()
+			 .append("text")
+			 .attr("class", "bar_title") 
+			 .attr("text-anchor", "middle")
+			 .attr("x", 10* XgridSize)     // x position of the first end of the line
+			 .attr("y", -35)
+			 .text(function(d,i) { return d.per1 + " - " + d.per2 });
 			
 
 		
@@ -532,8 +633,14 @@
 		link_line
 			.transition().duration(transition_time)
 			.attr("transform",function(d,i) {
-				var rank = d.values[0].values[0].rank
-			return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var rank_min = Math.min(rank1,rank2)
+				if (rank_min < nb_cancer+1) {
+					return "translate(0," + yScale(rank1 + (bar_space*(rank1-1))) + ")";
+				} else {
+					return "translate(0," + yScale(11 + (bar_space*(10))) + ")";
+				}
 			})
 			.attr("opacity" ,function(d,i) {
 				var rank1 = d.values[0].values[0].rank
@@ -554,7 +661,7 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
-						return 580-(20* XgridSize);
+						return (graph_separation-margin.left_page)-(20* XgridSize)-30;
 					}
 					else {
 						return 20* XgridSize;
@@ -574,7 +681,7 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-						return 20* XgridSize+20;
+						return 20* XgridSize+30;
 					}
 					else {
 						return (graph_separation-margin.left_page)-(20* XgridSize);
@@ -583,9 +690,12 @@
 				.attr("y2",function(d,i) {
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
+					var rank_min = Math.min(rank1,rank2)
 					var rank_diff = (rank2-rank1)+1
 					if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
 						return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
+					} else if (rank_min > nb_cancer) {
+						return YgridSize/2;
 					}
 					else {
 						return yScale(rank_diff+(bar_space*(rank_diff-1)))+YgridSize/2;
@@ -609,7 +719,11 @@
 		bar1.transition().duration(transition_time)	
 		  .attr("transform",function(d,i) {
 			var rank = d.values[0].values[0].rank
-			return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+			if (rank < nb_cancer+1) {
+				return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+			} else {
+				return "translate(0," + yScale(11 + (bar_space*(9))) + ")";
+			}
 		  })
 		  .attr("opacity" ,function(d,i) {
 			var rank = d.values[0].values[0].rank
@@ -662,9 +776,13 @@
 			return xScale(d.asr);})
 
 		bar2.transition().duration(transition_time)	
-		  .attr("transform",function(d,i) {
-		  var rank = d.values[1].values[0].rank
-		  return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+		 .attr("transform",function(d,i) {
+			var rank = d.values[1].values[0].rank
+			if (rank < nb_cancer+1) {
+				return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+			} else {
+				return "translate(0," + yScale(11 + (bar_space*(9))) + ")";
+			}
 		  })
 		  .attr("opacity" ,function(d,i) {
 			var rank = d.values[1].values[0].rank

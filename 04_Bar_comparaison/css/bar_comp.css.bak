@@ -39,10 +39,12 @@ body {
 	font-size:1em;
 	}
 	
-#option {
+.div_centered {
 	text-align: center;
-    margin: 10px auto;
+    margin: 0px 10px 10px 10px;
 	}
+	
+
 	
 form {
 	display:inline-block;
@@ -50,6 +52,15 @@ form {
 	margin-right:50px;
 	}
 	
+#countryList {
+	text-align-last:center;
+	font-size:20px;
+	border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom-width: 2px;
+    border-bottom-color: black;
+}
 
 	
 form h4{
@@ -97,13 +108,21 @@ form h4{
 	fill: #000;
   }
   
+    text.bar_title {
+	font-size: 20px;
+  }
+  
  line {
 	stroke-width: 0.8;
 }
 	  
  	line.tick_major  {
 			opacity: 0.8;
-	}  
+	} 
+
+ 	line.tick_minor  {
+			opacity: 0.6;
+	}  	
 	
 	  .xaxis path,
 	  .xaxis line {
@@ -115,7 +134,6 @@ form h4{
 
 	.xaxis text {
 		font-family: sans-serif;
-		font-size: 14px;
 	}
 	
 

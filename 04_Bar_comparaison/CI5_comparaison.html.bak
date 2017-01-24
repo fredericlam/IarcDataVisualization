@@ -18,14 +18,14 @@
 		
 		// variable general
 		
-	var margin = { top: 100, right: 200, bottom: 100, left: 300, top_page: 50, left_page: 300 },
+	var margin = { top: 100, right: 200, bottom: 100, left: 300, top_page: 100, left_page: 300 },
 	width = 1500 - margin.left - margin.right,
-	height = 1500 - margin.top - margin.bottom,
-	XgridSize = Math.floor(width / 75),
-	YgridSize = Math.floor(height / 35);
+	height = 800 - margin.top - margin.bottom,
+	XgridSize = Math.floor(width / 65),
+	YgridSize = Math.floor(height / 15);
 	
 	var bar_space = 0.3
-	var graph_separation = 900
+	var graph_separation = 1000
 	var nb_registry = 13
 	var nb_cancer = 10 
 	
@@ -46,7 +46,8 @@
 		.scale(xScale)
 		.orient("bottom")
 		.tickSize(0, 0,0)
-		.tickPadding(12)	
+		.tickPadding(12)
+		.tickValues([0,20,40,60,80,100])		
 
 
 		
@@ -78,20 +79,20 @@
 	
 	</div>
 	
-		<div id="option">
-		
-		<form>
-		<h4>Sex</h4>
-		<label><input type="radio" id="radio_sex_male"  name="sex"  checked="checked" onChange="combo_sex('Men')"> Male</label>
-		<label><input type="radio" id="radio_sex_female" name="sex"   onChange="combo_sex('Women')"> Female</label>
-		</form>
-	
+		<div class = "div_centered">
 		<form class="comboCountry">
-		<h4>Registry selection</h4>
 		<select name="country_select" id="countryList" onChange="combo_registry(this)">
 		</select> 
 		</form>
-	</div>
+		</div>
+		
+		<div class = "div_centered last_option">
+		<form>
+		<label><input type="radio" id="radio_sex_male"  name="sex"  checked="checked" onChange="combo_sex('Men')"> Male</label>
+		<label><input type="radio" id="radio_sex_female" name="sex"   onChange="combo_sex('Women')"> Female</label>
+		</form>
+		</div>
+
 		<div id="chart"></div>
 		
 
