@@ -101,7 +101,14 @@ form h4{
 	stroke-width: 0.8;
 }
 	  
-  
+ 	line.tick_major  {
+			opacity: 0.8;
+	} 
+
+ 	line.tick_minor  {
+			opacity: 0.6;
+	}  	
+	
 	  .xaxis path,
 	  .xaxis line {
 			fill: none;
@@ -115,7 +122,5 @@ form h4{
 		font-size: 14px;
 	}
 	
-	.tick line{
-		opacity: 0.4;
-	}
+
 	
