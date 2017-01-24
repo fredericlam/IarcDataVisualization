@@ -128,6 +128,7 @@ form h4{
 	  .xaxis line {
 			fill: none;
 			stroke: black;
+			opacity:0.8
 		}
 		
 	
@@ -135,6 +136,16 @@ form h4{
 	.xaxis text {
 		font-family: sans-serif;
 	}
+	
+	  .xaxis_minor path,
+	  .xaxis_minor line {
+			fill: none;
+			stroke: black;
+			opacity:0.6;
+		}
+		
+	
+
 	
 
 	

@@ -92,10 +92,20 @@
 			.attr("transform", "translate(" + (0)+ "," + (yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2) + ")")
 			.call(xAxis);
 			
+		bar_graph1.append("g") // draw axis
+			.attr("class", "xaxis_minor")
+			.attr("transform", "translate(" + (0)+ "," + (yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2) + ")")
+			.call(xAxis_minor);
+			
 		bar_graph2.append("g") // draw axis
 			.attr("class", "xaxis")
 			.attr("transform", "translate(" + (0)+ "," + (yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2) + ")")
 			.call(xAxis);
+			
+		bar_graph2.append("g") // draw axis
+		.attr("class", "xaxis_minor")
+		.attr("transform", "translate(" + (0)+ "," + (yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2) + ")")
+		.call(xAxis_minor);
 			
 		
 			
@@ -108,7 +118,7 @@
 		  .append("line")
 		  .attr("class", "tick_major")
 		  .attr("stroke", "black")
-		  .attr("y1", -20)
+		  .attr("y1", graph_height)
 		  .attr("y2", graph_height+8)
 		  .attr("x1", function(d) { 
 			return xScale(d); })
@@ -121,7 +131,7 @@
 		  .append("line")
 		  .attr("class", "tick_major")
 		  .attr("stroke", "black")
-		  .attr("y1", -20)
+		  .attr("y1", graph_height)
 		  .attr("y2", graph_height+8)
 		  .attr("x1", function(d) { 
 			return xScale(d); })
@@ -134,7 +144,7 @@
 		  .append("line")
 		  .attr("class", "tick_minor")
 		  .attr("stroke", "black")
-		  .attr("y1", -20)
+		  .attr("y1", graph_height)
 		  .attr("y2", graph_height+6)
 		  .attr("x1", function(d) { 
 			return xScale(d); })
@@ -147,7 +157,7 @@
 		  .append("line")
 		  .attr("class", "tick_minor")
 		  .attr("stroke", "black")
-		  .attr("y1", -20)
+		   .attr("y1", graph_height)
 		  .attr("y2", graph_height+6)
 		  .attr("x1", function(d) { 
 			return xScale(d); })
@@ -526,14 +536,27 @@
 		var xAxis = d3.svg.axis() 
 		.scale(xScale)
 		.orient("bottom")
-		.tickSize(0, 0,0)
+		.tickSize(-graph_height-20, 0,0)
 		.tickPadding(12)
 		.tickValues(tick_list.major);
+		
+		var xAxis_minor = d3.svg.axis() 
+		.scale(xScale)
+		.orient("bottom")
+		.tickSize(-graph_height-20, 0,0)
+		.tickPadding(12)
+		.tickValues(tick_list.minor)	
+		.tickFormat("")		
 		
 		d3.select("#chart")
 		   .selectAll(".xaxis")
            .transition().duration(1500).ease("sin-in-out")  // https://github.com/mbostock/d3/wiki/Transitions#wiki-d3_ease
-           .call(xAxis);  
+           .call(xAxis); 
+
+		d3.select("#chart")
+		   .selectAll(".xaxis_minor")
+           .transition().duration(1500).ease("sin-in-out")  // https://github.com/mbostock/d3/wiki/Transitions#wiki-d3_ease
+           .call(xAxis_minor);  		   
 		 
 		 var xgrid_major1=d3.select("#chart").select(".bar_graph1").selectAll(".tick_major")
 			.data(tick_list.major, function(d) { return d; })
@@ -554,8 +577,8 @@
 			.append("line")
 			.attr("class", "tick_major")
 			.attr("stroke", "black")
-			.attr("y1", -20)
-			.attr("y2", graph_height+6)
+			.attr("y1", graph_height)
+		    .attr("y2", graph_height+8)
 			.attr("x1", function(d) { 
 				return xScale(d); })
 			.attr("x2", function(d) { 
@@ -571,8 +594,8 @@
 			.append("line")
 			.attr("class", "tick_major")
 			.attr("stroke", "black")
-			.attr("y1", -20)
-			.attr("y2", graph_height+6)
+			.attr("y1", graph_height)
+		    .attr("y2", graph_height+6)
 			.attr("x1", function(d) { 
 				return xScale(d); })
 			.attr("x2", function(d) { 
@@ -599,8 +622,8 @@
 			.append("line")
 			.attr("class", "tick_major")
 			.attr("stroke", "black")
-			.attr("y1", -20)
-			.attr("y2", graph_height+6)
+			.attr("y1", graph_height)
+		    .attr("y2", graph_height+8)
 			.attr("x1", function(d) { 
 				return xScale(d); })
 			.attr("x2", function(d) { 
@@ -610,8 +633,8 @@
 			.append("line")
 			.attr("class", "tick_minor")
 			.attr("stroke", "black")
-			.attr("y1", -20)
-			.attr("y2", graph_height+6)
+			.attr("y1", graph_height)
+		    .attr("y2", graph_height+6)
 			.attr("x1", function(d) { 
 				return xScale(d); })
 			.attr("x2", function(d) { 
