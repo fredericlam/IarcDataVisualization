@@ -201,11 +201,11 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
-						return (graph_separation-margin.left_page)-(20* XgridSize)-30;
+						return (graph_separation-margin.left_page)-(line_separation)-30;
 					}
 					else {
-						return 20* XgridSize;
 					}
+						return 20* XgridSize;
 				})
 				.attr("y1",  function(d,i) {
 					var rank1 = d.values[0].values[0].rank
@@ -221,10 +221,10 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-						return 20* XgridSize+30;
+						return 20* XgridSize+40;
 					}
 					else {
-						return (graph_separation-margin.left_page)-(20* XgridSize);
+						return (graph_separation-margin.left_page)-(line_separation);
 					}
 				})
 				.attr("y2",function(d,i) {
@@ -285,11 +285,18 @@
 			  .append("text")
 			  .attr("class", "label")
 			  .attr("text-anchor", "end")
-			  .attr("transform",function(d,i) {return "translate(" +(-5) + "," +YgridSize/1.5 + ")";})
-			  .text(function(d) {return d.cancer_label;});
-			  
+			  .attr("transform", "translate(-5,0)")
+			  .each(function (d) {
+				var lines = wordwrap(d.cancer_label, label_wrap)
+				for (var i = 0; i < lines.length; i++) {
+
+						d3.select(this).append("tspan").attr("dy",0).attr("x",0).attr("y",YgridSize/Math.pow(3/2, lines.length)+i*15).text(lines[i])
+
+				}
+				});	
+			
 			bar1.selectAll("rect")
-				.data(function(d) {return d.values[0].values})	
+				.data(function(d) {return d.values[0].values})		
 				.enter()
 				.append("rect")
 				.classed("bordered", true)
@@ -352,8 +359,15 @@
 			  .attr("id", function(d, i) { return d.cancer_label;})
 			  .attr("class", "label")
 			  .attr("text-anchor", "end")
-			  .attr("transform",function(d,i) {return "translate(" +(-5) + "," +YgridSize/1.5 + ")";})
-			  .text(function(d) {return d.cancer_label;});
+			  .attr("transform", "translate(-5,0)")
+			  .each(function (d) {
+				var lines = wordwrap(d.cancer_label, label_wrap)
+				for (var i = 0; i < lines.length; i++) {
+
+						d3.select(this).append("tspan").attr("dy",0).attr("x",0).attr("y",YgridSize/Math.pow(3/2, lines.length)+i*15).text(lines[i])
+
+				}
+				});	
 			  
 			bar2.selectAll("rect")
 				.data(function(d) {return d.values[1].values})	
@@ -370,7 +384,7 @@
 			  
 			bar2.append("line")
 				.attr("class","line2")
-				.attr("x1", -20* XgridSize)
+				.attr("x1", -line_separation)
 				.attr("y1", YgridSize/2)
 				.attr("x2", function(d,i) {
 						var temp = document.getElementById(d.values[1].values[0].cancer_label).getBBox().width;
@@ -684,7 +698,7 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
-						return (graph_separation-margin.left_page)-(20* XgridSize)-30;
+						return (graph_separation-margin.left_page)-(line_separation)-30;
 					}
 					else {
 						return 20* XgridSize;
@@ -704,10 +718,10 @@
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
 					if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-						return 20* XgridSize+30;
+						return 20* XgridSize+40;
 					}
 					else {
-						return (graph_separation-margin.left_page)-(20* XgridSize);
+						return (graph_separation-margin.left_page)-(line_separation);
 					}
 				})	
 				.attr("y2",function(d,i) {
@@ -797,6 +811,14 @@
 		  .transition().duration(transition_time)	
 		  .attr("width", function(d,i) { 
 			return xScale(d.asr);})
+		  .attr("fill", function(d,i) { 
+				if (d.sex == 1) {
+					return "#2c7bb6";
+				} else {
+					return "#b62ca1";
+				}
+					
+			});
 
 		bar2.transition().duration(transition_time)	
 		 .attr("transform",function(d,i) {
@@ -820,7 +842,18 @@
 		bar2.selectAll("rect")
 			.data(function(d) {return d.values[1].values;})
 			.transition().duration(transition_time)	
-			.attr("width", function(d,i) { return xScale(d.asr);})}
+			.attr("width", function(d,i) { return xScale(d.asr);})
+			.attr("fill", function(d,i) { 
+				if (d.sex == 1) {
+					return "#2c7bb6";
+				} else {
+					return "#b62ca1";
+				}
+					
+			});
+			
+	}
+			
 			
 
 	

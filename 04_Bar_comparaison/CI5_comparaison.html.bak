@@ -25,9 +25,11 @@
 	YgridSize = Math.floor(height / 15);
 	
 	var bar_space = 0.3
-	var graph_separation = 1000
+	var graph_separation = 900
 	var nb_registry = 13
 	var nb_cancer = 10 
+	var line_separation = graph_separation/5
+	var label_wrap = 18
 	
 	var transition_time = 1500
 		
@@ -42,6 +44,7 @@
 		.range([0  ,20* XgridSize]);
 	
 	var graph_height = yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2
+	
 	var xAxis = d3.svg.axis() 
 		.scale(xScale)
 		.orient("bottom")
@@ -54,7 +57,8 @@
 		.orient("bottom")
 		.tickSize(-graph_height-20, 0,0)
 		.tickPadding(12)
-		.tickValues([10,30,50,70,90])			
+		.tickValues([10,30,50,70,90])	
+		.tickFormat("")		
 
 
 		
