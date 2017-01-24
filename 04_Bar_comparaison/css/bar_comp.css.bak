@@ -146,10 +146,6 @@ form h4{
 		
 	
 
-	.xaxis_minor text {
-		font-family: sans-serif;
-		opacity:1;
-	}
 	
 
 	
