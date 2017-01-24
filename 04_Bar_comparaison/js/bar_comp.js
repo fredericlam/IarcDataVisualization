@@ -309,9 +309,22 @@
 			}
 		}
 		var value_top = Math.ceil(value_max/tick_space)*tick_space;
-		var tick_list = [];
+		
+		var tick_list = new Object();  
+		tick_list.major = [];
+		tick_list.minor = [];
+		tick_list.value_top = value_top; 
+		var bool_major = true;
 		for (var i = 0; i <= value_top; i += tick_space) {
-			tick_list.push(i);
+			
+			if (bool_major) {
+				tick_list.major.push(i);
+			} else {
+				tick_list.minor.push(i);
+			}
+			
+			bool_major = !bool_major;
+			
 		}
 	return (tick_list)
 	}
@@ -347,17 +360,16 @@
 		
 		var x_max = d3.max(data, function(d) {return d.asr})
 		var tick_list = tick_generator(x_max)
-		console.log(tick_list.length)
-		console.log(tick_list[tick_list.length-1])
 		
-		xScale.domain([0, tick_list[tick_list.length-1]]);
+		xScale.domain([0,tick_list.value_top]);
+		
 		
 		var xAxis = d3.svg.axis() 
 		.scale(xScale)
 		.orient("bottom")
 		.tickSize(-graph_height-20,0)
 		.tickPadding(8)
-		.tickValues(tick_list);
+		.tickValues(tick_list.major);
 		
 		d3.select("#chart")
 		   .selectAll(".xaxis")
@@ -365,7 +377,7 @@
            .call(xAxis);  
 		   
 		link_line
-			.transition().duration(1000)
+			.transition().duration(transition_time)
 			.attr("transform",function(d,i) {
 				var rank = d.values[0].values[0].rank
 			return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
@@ -384,7 +396,7 @@
 			
  		 d3.select("#chart").selectAll(".line_link")
 		  .data(data_nest)
-		  .transition().duration(1000)	
+		  .transition().duration(transition_time)	
 		 .attr("x1", function(d,i) {
 					var rank1 = d.values[0].values[0].rank
 					var rank2 = d.values[1].values[0].rank
@@ -441,7 +453,7 @@
 					
 			
 		  
-		bar1.transition().duration(1000)	
+		bar1.transition().duration(transition_time)	
 		  .attr("transform",function(d,i) {
 			var rank = d.values[0].values[0].rank
 			return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
@@ -459,7 +471,7 @@
 
  		d3.select("#chart").selectAll(".line1")
 		  .data(data_nest)
-		  .transition().duration(1000)	
+		  .transition().duration(transition_time)	
 		  .attr("x1", function(d,i) {return xScale(d.values[0].values[0].asr)+5;})
 		  .attr("stroke", function(d,i) {
 			var rank1 = d.values[0].values[0].rank
@@ -476,7 +488,7 @@
 		
 		 d3.select("#chart").selectAll(".line2")
 		  .data(data_nest)
-		  .transition().duration(1000)	
+		  .transition().duration(transition_time)	
 		  .attr("stroke", function(d,i) {
 			var rank1 = d.values[0].values[0].rank
 			var rank2 = d.values[1].values[0].rank
@@ -492,11 +504,11 @@
   
 		bar1.selectAll("rect")
 		  .data(function(d) {return d.values[0].values;})
-		  .transition().duration(1000)	
+		  .transition().duration(transition_time)	
 		  .attr("width", function(d,i) { 
 			return xScale(d.asr);})
 
-		bar2.transition().duration(1000)	
+		bar2.transition().duration(transition_time)	
 		  .attr("transform",function(d,i) {
 		  var rank = d.values[1].values[0].rank
 		  return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
@@ -513,7 +525,7 @@
 
 		bar2.selectAll("rect")
 			.data(function(d) {return d.values[1].values;})
-			.transition().duration(1000)	
+			.transition().duration(transition_time)	
 			.attr("width", function(d,i) { return xScale(d.asr);})}
 			
 
@@ -555,9 +567,63 @@ function wordwrap(text, max) {
     } 
 	 return lines
 }
+		
+	function combo_sex(sex) {
+		
+		if (sex == 'Men') {
+			var sex_select = 1;
+		} else {
+			var sex_select = 2;
+		}
+
+		var file_use = "data/CI5IvsCI5X.csv"; 
+		var country_select = document.getElementById('countryList').value;
+
+			 d3.csv(file_use,
+				function(d) {
+				return {
+					
+					rank : +d.rank,
+					cancer_label : d.cancer_label,
+					cancer: +d.cancer,
+					volume : +d.volume,
+					sex : +d.sex,
+					per1: d.per1,
+					per2: d.per2,
+					asr: +d.asr,
+					country_label: d.country_label,
+					country_code: +d.country_code
+
+					
+					
+					};	
+				},		
+				function(data) {
+		
+
+				
+				var datatemp = data.filter(function(d){
+					return (d.country_code == country_select & d.sex == sex_select)
+				});
+				
+				update(datatemp)
+				
+				}
+
+			)
+
 			
+		}
+		
+	
 	function combo_registry(thelist)
 	    {
+			if (document.getElementById('radio_sex_male').checked) {
+				sex_select = 1;
+			} else {
+				sex_select = 2;
+			}
+		
 		
 		var file_use = "data/CI5IvsCI5X.csv"; 
 
@@ -586,7 +652,7 @@ function wordwrap(text, max) {
 				country_select = thelist.options[idx_1].value;
 				
 				var datatemp = data.filter(function(d){
-					return (d.country_code == country_select & d.sex == 1)
+					return (d.country_code == country_select & d.sex == sex_select)
 				});
 				
 				update(datatemp)

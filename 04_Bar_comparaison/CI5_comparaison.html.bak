@@ -4,7 +4,7 @@
   <head>
   
   	<title> CI5 comparaison </title>
-	<link rel="icon" href="favicon.ico" />
+	<!--link rel="icon" href="favicon.ico" /-->
 	<link rel="stylesheet" href="css/bar_comp.css" type="text/css">
 	<script type="text/javascript" src="d3/d3.v3.min.js"></script>
 	<script type="text/javascript" src="js/bar_comp.js"></script>
@@ -26,8 +26,10 @@
 	
 	var bar_space = 0.3
 	var graph_separation = 900
-	var nb_registry = 13;
+	var nb_registry = 13
 	var nb_cancer = 10 
+	
+	var transition_time = 2000
 		
 	var yScale = d3.scale.linear()
 		.domain([1, 32])
@@ -77,6 +79,12 @@
 	</div>
 	
 		<div id="option">
+		
+		<form>
+		<h4>Sex</h4>
+		<label><input type="radio" id="radio_sex_male"  name="sex"  checked="checked" onChange="combo_sex('Men')"> Male</label>
+		<label><input type="radio" id="radio_sex_female" name="sex"   onChange="combo_sex('Women')"> Female</label>
+		</form>
 	
 		<form class="comboCountry">
 		<h4>Registry selection</h4>
