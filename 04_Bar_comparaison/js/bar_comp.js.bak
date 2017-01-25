@@ -609,6 +609,10 @@
 				});
 					
 					
+						
+		var bar_graph2 = d3.select("#chart").select(".bar_graph2").selectAll("rect")
+			.data(data_nest)// draw main windows
+					
 		var bar1 = d3.select("#chart").selectAll(".bar1")
 			.data(data_nest)
 				
