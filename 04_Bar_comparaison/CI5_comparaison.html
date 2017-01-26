@@ -16,34 +16,42 @@
 	
 		<script type="text/javascript">
 		
-		// variable general
-		
+	// variable general
+	
 	var margin = { top: 100, right: 200, bottom: 100, left: 300, top_page: 70, left_page: 300 },
 	width = 1500 - margin.left - margin.right,
 	height = 800 - margin.top - margin.bottom,
-	XgridSize = Math.floor(width / 65),
-	YgridSize = Math.floor(height / 15);
 	
-	var bar_space = 0.3
-	var graph_separation = 900
-	var nb_registry = 13
-	var nb_cancer = 10 
+	// I keep Xgrid and Y grid form the heatmap
+	XgridSize = Math.floor(width / 65), // 20*Xgrid for the range of the bar 
+	YgridSize = Math.floor(height / 15); // YgridSize is the height of one bar
+	
+	
+
+	var bar_space = 0.3 	// Space between bar 
+	var graph_separation = 900 // separation between the bar chart
+	var nb_registry = 13 
+	var nb_cancer = 10  // nb of cancer shows (here top 10)
 	var line_separation = graph_separation/5
-	var label_wrap = 19
+	var label_wrap = 19 // size max of a label on one line
 	
 	var var_width = 20* XgridSize
 	
 	var transition_time = 1500
-		
+	
+	
 	var yScale = d3.scale.linear()
-		.domain([1, 32])
+		.domain([1, 32])  // 32 is the number of cancer site in the csv file
 		.range([0  ,(32-1)* YgridSize ]);
 		
-				
+	// height of the bar graph
 	var graph_height = yScale(nb_cancer+1+((nb_cancer-1)*bar_space))+2	
-				
+	
+	// I define xScale and Xaxis's here because I want them as general variable 
+	// So I need to use the value for the Canada Men..
+	// I suppose there should be another way, to define them in the d3.csv fonction and use the data..
 	var xScale = d3.scale.linear()
-		.domain([0, 100])
+		.domain([0, 100]) 
 		.range([0  ,var_width]);
 		
 	var xAxis = d3.svg.axis() 
@@ -59,8 +67,11 @@
 		.tickSize(-graph_height-20, 0,0)
 		.tickPadding(12)
 		.tickValues([10,30,50,70,90])	
-		.tickFormat("")		
-								 
+		.tickFormat("")	
+
+		
+	
+	
 	 window.onload = function()
 		{
 		bar_comp()
