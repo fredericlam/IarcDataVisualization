@@ -99,6 +99,20 @@
 		{
 			Heatmap_gen()
 		};
+		
+		function doc_keyUp(e) {
+
+		// add jeyboard shortcut for s + ctrl
+		if (e.keyCode == 83) {
+			// call your function to do the thing
+			sortBars(true);
+			document.getElementById('radio_cluster_on').checked = true;
+			document.getElementById('radio_cluster_off').checked = false;
+
+		}
+			}
+			// register the handler 
+		document.addEventListener('keyup', doc_keyUp, false);
 			
 	</script>
 	
