@@ -36,19 +36,31 @@ body {
 	
 #header div.desc{
 	text-align:center;
-	font-size:1em;
+	font-size:2em;
+	margin-top:10px;
 	}
 	
-.div_centered {
-	text-align: center;
-    margin: 0px 10px 10px 10px;
+#chart {
+	float:left;
+	max-width:70%;
+	}
+	
+
+	
+.div_right {
+	position:relative;
+	top:-150px;
+	left:-1450px;
+	float:right;
+	 
 	}
 	
 
 	
 form {
 	display:inline-block;
-	max-width:350px;
+	margin: 10px 0px 10px 10px;
+
 	}
 	
 #countryList {
@@ -93,7 +105,7 @@ form h4{
 	
 	  
   text.mono {
-	font-size: 9pt;
+	font-size: 11pt;
 	font-family:  sans-serif;
 	fill: #000000;
 	shape-rendering: crispEdges;
@@ -108,6 +120,31 @@ form h4{
   }
   
     text.bar_title {
+	font-size: 30px;
+  }
+  
+    text.y_title {
+	font-size: 22px;
+  }
+  
+    g.graph_legend text {
+	font-size: 22px;
+  }
+ 
+     text.text1 {
+	font-size: 17px;
+  }
+  
+ 
+     text.text2 {
+	font-size: 17px;
+  }
+  
+  text.text_percent {
+	font-size: 20px;
+  }
+  
+    text.cancer_label {
 	font-size: 20px;
   }
   
@@ -123,8 +160,8 @@ form h4{
 			opacity: 0.6;
 	}  	
 	
-	  .xaxis path,
-	  .xaxis line {
+	  .yaxis path,
+	  .yaxis line {
 			fill: none;
 			stroke: black;
 			opacity:0.8
@@ -132,12 +169,12 @@ form h4{
 		
 	
 
-	.xaxis text {
+	.yaxis text {
 		font-family: sans-serif;
 	}
 	
-	  .xaxis_minor path,
-	  .xaxis_minor line {
+	  .yaxis_minor path,
+	  .yaxis_minor line {
 			fill: none;
 			stroke: black;
 			opacity:0.6;
