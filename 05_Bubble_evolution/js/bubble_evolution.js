@@ -64,10 +64,7 @@
 				add_legend(graph_legend);
 				
 				
-					
-
-					//add_bar_text_line(bar_graph,data_nest, false)	
-					//add_line_link(bar_graph[0],data_nest);			
+			
 			
 			}
 		);
@@ -289,12 +286,7 @@
 		})
 		.attr("transform",  function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				if (update_range < 0) {
-					var offset = -14;
-				}
-				else {
-					var offset = 14;
-				}
+				var offset = Math.sign(update_range)*14
 				if (update_range  > 50 || update_range  < -50 ) {
 					return ( "translate(0," + ( offset)+ ")");
 				} 
@@ -308,28 +300,17 @@
 			.style("stroke-width", 2)				
 			.attr("y1", function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				if (update_range < 0) {
-					return(-20);
-				} else {
-					return(20);
-				}
+				return (Math.sign(update_range)*20)
 			})
 			.attr("y2", function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				if (update_range < 0) {
-					return(-20);
-				} else {
-					return(20);
-				}
+				return (Math.sign(update_range)*20)
 			});
 
 			
-		
 
-			
 		nodes.append("circle")
 			.attr("class","circle2")
-			//.attr("cy", function(d, i) {return yScale(d.rate2)- yScale(d.rate1)})
 			.attr("r", 20)
 			.style("stroke", function(d,i) {return color_cancer[d.cancer_label];})    // set the line colour
 			.style("stroke-width", 2)
@@ -385,33 +366,66 @@
 		
 	}
 	
-	
-	function update_legend() {
+	function update(bool) {
 		
-		d3.select("#chart").select(".graph_legend").selectAll(".circle_legend2")
-			.transition().duration(transition_time).ease(ease_effect)
-			.attr("transform","translate(0,50)");
+
 			
-		d3.select("#chart").select(".graph_legend").selectAll(".text_legend2")
-			.transition().duration(transition_time).ease(ease_effect)
-			.attr("transform","translate(0,50)")
-			.style("opacity",1);
-		
+			update_circle(".bar_graph1", bool);
+			update_circle(".bar_graph2", bool);
+			update_legend(bool);
 			
-		
-		
 		
 	}
 	
-	function update_circle(bar_graph_class) {
 	
-
-		var nodes=d3.select("#chart").select(bar_graph_class).select("#nodes_id");	
+	function update_legend(bool) {
 		
+		d3.select("#chart").select(".graph_legend").selectAll(".circle_legend2")
+			.transition().duration(transition_time).ease(ease_effect)
+						.attr("transform",function(d,i) {
+				if (bool) {
+					return "translate(0,50)";
+				}
+				else {
+					return "translate(0,0)";
+				}
+			})
+			
+		d3.select("#chart").select(".graph_legend").selectAll(".text_legend2")
+			.transition().duration(transition_time).ease(ease_effect)
+			.attr("transform",function(d,i) {
+				if (bool) {
+					return "translate(0,50)";
+				}
+				else {
+					return "translate(0,0)";
+				}
+			})
+			.style("opacity",function() {
+				if (bool) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			});
+	}
+	
+	
+	function update_circle(bar_graph_class, bool) {
+	
+		var nodes = d3.select("#chart")
+			
 		nodes.selectAll(".circle2")
 			.transition().duration(transition_time).ease(ease_effect)
 			.attr("transform",function(d,i) {
-				return "translate(0," + (yScale(d.rate2)- yScale(d.rate1)) + ")";
+				if (bool) {
+					update_range = yScale(d.rate2)- yScale(d.rate1)
+				}
+				else {
+					update_range = 0
+				}
+				return "translate(0," + (update_range) + ")";
 			});
 			
 		nodes.selectAll(".text1")
@@ -426,9 +440,22 @@
 			
 		nodes.selectAll(".text2")
 			.transition().duration(transition_time).ease(ease_effect)
-			.text(function(d,i) {return d.rate2})
+			.text(function(d,i) {
+				if (bool) {
+					temp_text = d.rate2
+				}
+				else {
+					temp_text = d.rate1
+				}
+				
+				return temp_text})
 			.attr("transform",function(d,i) {
-				var update_range = yScale(d.rate2)- yScale(d.rate1)
+				if (bool) {
+					update_range = yScale(d.rate2)- yScale(d.rate1)
+				}
+				else {
+					update_range = 0
+				}
 				return "translate(0," + (update_range) + ")";
 			});
 			
@@ -442,18 +469,22 @@
 			
 			
 		nodes.selectAll(".line_link")
-			.transition().delay(0).duration(transition_time).ease(ease_effect)
+			.transition().duration(transition_time).ease(ease_effect)
 			.attr("y2", function(d,i) {
-				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				if (update_range < 0) {
-					var offset = 25;
+				
+				update_range = yScale(d.rate2)- yScale(d.rate1)
+				var offset = Math.sign(update_range)*(-20)
+				
+				if (bool) {
+					offset = Math.sign(update_range)*(-25)
+					if (update_range  > 50 || update_range  < -50 ) {
+						return(update_range + offset);
+					} 
 				}
 				else {
-					var offset = -25;
+					return(offset);
 				}
-				if (update_range  > 50 || update_range  < -50 ) {
-					return(update_range + offset);
-				}
+				
 			});
 
 
@@ -469,33 +500,112 @@
 			.transition().delay(0).duration(transition_time).ease(ease_effect)
 			.attr("transform",  function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				if (update_range < 0) {
-					var offset = 27;
+				var offset = Math.sign(update_range)*14
+				
+				if (bool) {
+					 offset = Math.sign(update_range)* (-27)
+					if (update_range  > 50 || update_range  < -50 ) {
+						return ( "translate(0," + (update_range + offset)+ ")");
+					}
 				}
 				else {
-					var offset = -27;
-				}
-				if (update_range  > 50 || update_range  < -50 ) {
-					return ( "translate(0," + (update_range + offset)+ ")");
-				} 
+					return ( "translate(0," + (offset)+ ")");
+				}				
 			})
+			
 			
 		nodes.selectAll(".text_percent")
 			.transition().duration(transition_time).ease(ease_effect)
 			.attr("transform",function(d,i) {
-				var update_range = yScale(d.rate2)- yScale(d.rate1)
+				if (bool) {
+					var update_range = yScale(d.rate2)- yScale(d.rate1)
+				}
+				else {
+					var update_range = 0
+				}
 				return "translate(0," + (update_range/2) + ")";
 			})
-			.style("opacity",1);
-
-
-		
-		
-
-		
+			.style("opacity",function() {
+				if (bool) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			});
 	}
 			
 
+	function update_data(group_label,group_value){
+		
+		var file_use = "data/bochen_table_data.csv"; 
+		
+		d3.csv(file_use,
+			
+			function(d) {
+			return {
+				
+				hdi_group : +d.hdi_group,
+				sex : +d.sex,
+				cancer_label : d.cancer_label,
+				cancer_code: +d.cancer_code,
+				volume : +d.volume,
+				rate1: +d.rate1,
+				rate2: +d.rate2,
+
+				};	
+			},		
+			function(data) {
+			
+				var data_temp = data.filter(function(d){
+					return (d[group_label] == group_value)
+				});
+				
+				var bar_graph=[
+					d3.select("#chart").select(".bar_graph1"),
+					d3.select("#chart").select(".bar_graph2")
+					]
+				
+				var graph_legend = d3.select("#chart").select(".graph_legend")
+				
+				//add_axis_title(bar_graph,data_temp,true);
+				//add_axis_title(bar_graph,data_temp,false);
+				update_data_circle(bar_graph,data_temp, true);
+				update_data_circle(bar_graph,data_temp, false);
+				//add_legend(graph_legend);
+				
+
+			}
+		)
+			
+	}
+					
+			
+	function update_data_circle(graph, data,bool_left_graph) {
+		
+		if (bool_left_graph) {
+			sex = 1
+			v_key = 0 //volume key for the array or nest data
+		} else {
+			sex = 2
+			v_key = 1 
+		}
+		
+		graph_select = graph[v_key]
+		var data_temp = data.filter(function(d){
+			return (d.sex==sex)
+		});
+		
+		graph_select.selectAll(".circle2")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+			.attr("transform", function(d, i) {
+				return "translate(" + 0 + "," + yScale(d.rate1) + ")";
+			}); 
+		
+	}
+	
+	
 	function tick_generator(value_max, value_min = 0, log_scale=false )	{
 	//generate tick on the axis 
 		//max of the value
@@ -704,33 +814,6 @@
 	return (tick_list)
 	}
 	
-	
-	var populateComboRegistry = function(data) {
-	//fill registry combo (I don't know why I use var ?)
-		//data
-		
-		var datatemp = data.filter(function(d){
-			return (d.volume == 1 & d.sex == 1 & d.rank == 1)
-		});
-
-		var registry_list = {};
-		for (i=0;i<nb_registry; i++ ) {
-			registry_list[datatemp[i].country_label]=datatemp[i].country_code;
-		}
-
-		country_text = Object.keys(registry_list);
-		country_text.sort();
-				
-		var select  = document.getElementById("countryList")
-			
-		for (i=0; i < nb_registry; i++ ) {
-			var el = document.createElement("option");
-			var temp=country_text[i]
-			el.textContent = temp;
-			el.value =registry_list[temp];
-			select.appendChild(el);
-		}
-	}
 		
 		
 	function wordwrap(text, max) { // to wrap label (not from me, forget the link)
@@ -743,97 +826,8 @@
 		return lines
 	}
 		
-		
-	function combo_sex(sex) {
-	// update data from csv when sex change
-		// sex value
-		
-		if (sex == 'Men') {
-			var sex_select = 1;
-		} else {
-			var sex_select = 2;
-		}
 
-		var file_use = "data/CI5IvsCI5X.csv"; 
-		var country_select = document.getElementById('countryList').value;
-
-			 d3.csv(file_use,
-				function(d) {
-				return {
-					
-					rank : +d.rank,
-					cancer_label : d.cancer_label,
-					cancer: +d.cancer,
-					volume : +d.volume,
-					sex : +d.sex,
-					per1: d.per1,
-					per2: d.per2,
-					asr: +d.asr,
-					country_label: d.country_label,
-					country_code: +d.country_code
-
-					
-					
-					};	
-				},		
-				function(data) {
-				var datatemp = data.filter(function(d){
-					return (d.country_code == country_select & d.sex == sex_select)
-				});
-				
-				update(datatemp)
-				}
-			)
-		}
-		
 	
-	function combo_registry(thelist)
-	// update data from csv when registry change
-		//registry value
-	    {
-			if (document.getElementById('radio_sex_male').checked) {
-				sex_select = 1;
-			} else {
-				sex_select = 2;
-			}
-		
-		var file_use = "data/CI5IvsCI5X.csv"; 
-
-			d3.csv(file_use,
-				function(d) {
-				return {
-					
-					rank : +d.rank,
-					cancer_label : d.cancer_label,
-					cancer: +d.cancer,
-					volume : +d.volume,
-					sex : +d.sex,
-					per1: d.per1,
-					per2: d.per2,
-					asr: +d.asr,
-					country_label: d.country_label,
-					country_code: +d.country_code
-
-					
-					
-					};	
-				},		
-				function(data) {
-		
-				var idx_1 = thelist.selectedIndex;
-				country_select = thelist.options[idx_1].value;
-				
-				var datatemp = data.filter(function(d){
-					return (d.country_code == country_select & d.sex == sex_select)
-				});
-				
-				update(datatemp)
-				
-				}
-			)
-		}
-
-
 
 	
 	

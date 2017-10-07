@@ -98,9 +98,8 @@
 		// add jeyboard shortcut for s + ctrl
 		if (e.keyCode == 83) {
 			// call your function to do the thing
-			update_circle(".bar_graph1");
-			update_circle(".bar_graph2");
-			update_legend();
+			update_circle(true);
+			update_legend(true);
 
 		}
 			}
@@ -133,16 +132,16 @@
 		
 		<div class = "div_right">
 		<form>
-		<label><input type="radio" id="radio_old"  name="time"  checked="checked" onChange="combo_sex('Men')"> 1981-1985</label>
+		<label><input type="radio" id="radio_old"  name="time"  checked="checked" onChange="update(false)"> 1981-1985</label>
 		<br/>
-		<label><input type="radio" id="radio_new" name="time"   onChange="combo_sex('Women')"> 2006-2010</label>
+		<label><input type="radio" id="radio_new" name="time"   onChange="update(true)"> 2006-2010</label>
 		</form>
 		
 		<div class = "div_right2">
 		<form>
-		<label><input type="radio" id="radio_HDI1"  name="hdi"  checked="checked" onChange="combo_sex('Men')"> Very High HDI</label>
+		<label><input type="radio" id="radio_HDI1"  name="hdi"  checked="checked" onChange="update_data('hdi_group','0')"> Very High HDI</label>
 		<br/>
-		<label><input type="radio" id="radio_HDI2" name="hdi"   onChange="combo_sex('Women')"> Medium and High HDI</label>
+		<label><input type="radio" id="radio_HDI2" name="hdi"   onChange="update_data('hdi_group','1')"> Medium and High HDI</label>
 		</form>
 		
 
