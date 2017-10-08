@@ -3,11 +3,11 @@
  
   <head>
   
-  	<title> Bubble evolution </title>
+  	<title> Bubble chart mortality hdi </title>
 	<!--link rel="icon" href="favicon.ico" /-->
 	<link rel="stylesheet" href="css/bubble_evolution.css" type="text/css">
 	<script type="text/javascript" src="d3/d3.v3.min.js"></script>
-	<script type="text/javascript" src="js/bubble_evolution.js"></script>
+	<script type="text/javascript" src="js/bubble_mortality_hdi.js"></script>
 
 
 
@@ -55,14 +55,14 @@
 	
 
 	
-	var ease_effect = "exp-in-out"
+	var ease_effect = "sin-in-out"
 	var transition_time = 1500
 	
 	var bar_space = 2.5	// Space between bar 
 	var nb_cancer = 4  // nb of cancer shows (here top 10)
 	var label_wrap = 19 // size max of a label on one line
 	
-	var var_height = 450
+	var var_height = 550
 	
 	var graph_separation = 40
 
@@ -130,20 +130,26 @@
 		
 		<div id="chart"></div>
 		
-		<div class = "div_right">
+		<div class = "div_left">
 		<form>
 		<label><input type="radio" id="radio_old"  name="time"  checked="checked" onChange="update(false)"> 1981-1985</label>
 		<br/>
 		<label><input type="radio" id="radio_new" name="time"   onChange="update(true)"> 2006-2010</label>
 		</form>
 		
-		<div class = "div_right2">
+		<div >
 		<form>
 		<label><input type="radio" id="radio_HDI1"  name="hdi"  checked="checked" onChange="update_data('hdi_group','0')"> Very High HDI</label>
 		<br/>
 		<label><input type="radio" id="radio_HDI2" name="hdi"   onChange="update_data('hdi_group','1')"> Medium and High HDI</label>
 		</form>
 		
+		<div >
+		<form>
+		<label><input type="checkbox" id="check_axis"  name="axis_update"  checked="checked"> Update axis</label>
+		</form
+		
+
 
 		
 		

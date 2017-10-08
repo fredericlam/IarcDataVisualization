@@ -53,7 +53,7 @@
 					.attr("height", 30)
 					.append("g")
 					.attr("class", "graph_legend")	
-					.attr("transform", "translate(" + ( margin.left_page + (graph_width*2) + graph_separation + 90)   + "," + (margin.top_page-40)  + ")") 
+					.attr("transform", "translate(" + ( margin.left_page + (graph_width*2) + graph_separation + 110)   + "," + (margin.top_page-40)  + ")") 
 					
 				
 
@@ -134,17 +134,18 @@
 		} else {
 			v_key = 1 
 			axis_orient = "right"
-			axis_x = graph_width+5
-			axis_tick1 = 0
-			axis_tick2 = 15
+			axis_x = graph_width
+			axis_tick1 = -graph_width
+			axis_tick2 = graph_width+10
 			graph_title = "Females"
+			
 		}
 		
 
 		var yAxis = d3.svg.axis() 
 			.scale(yScale)
 			.orient(axis_orient)
-			.tickSize(0, 0,0)
+			.tickSize(-graph_width, 0,0)
 			.tickPadding(12)
 			.tickValues(tick_list.major)	
 			
@@ -152,7 +153,7 @@
 	    var yAxis_minor = d3.svg.axis() 
 			.scale(yScale)
 			.orient(axis_orient)
-			.tickSize(0, 0,0)
+			.tickSize(-graph_width, 0,0)
 			.tickPadding(12)
 			.tickValues(tick_list.minor)	
 			.tickFormat("")	;
@@ -183,9 +184,9 @@
 			.data(tick_list.major, function(d) { return d; })
 			.enter()
 			.append("line")
-			//.attr("class", "tick_major")
+			.attr("class", "tick_major")
 			.attr("stroke", "black")
-			.attr("x2", graph_width + axis_tick2 )
+			.attr("x2",  axis_tick2 )
 			.attr("x1", -axis_tick1)
 			.attr("y2", function(d) { return yScale(d); })
 			.attr("y1", function(d) { return yScale(d); })
@@ -196,41 +197,33 @@
 			.append("line")
 			.attr("class", "tick_minor")
 			.attr("stroke", "black")
-			.attr("x2", graph_width+ axis_tick2)
+			.attr("x2",  axis_tick2)
 			.attr("x1", -axis_tick1)
 			.attr("y2", function(d) { return yScale(d); })
 			.attr("y1", function(d) { return yScale(d); })
 		
 			
-				
-
-		graph_select.append("line") // add line for x = 0
+		graph_select.append("line") // add line for y = 0
 			.style("stroke", "black")  
-			.attr("x1", function() {
-				if (bool_left_graph) {
-					return 0;
-				}
-				else {
-					return graph_width+5;
-				}
-			})				
-			.attr("y1", var_height)  
-			.attr("x2", function() {
-				if (bool_left_graph) {
-					return 0;
-				}
-				else {
-					return graph_width+5;
-				}
-			})	 
-			.attr("y2", -20);
+			.attr("x1", 0)
+			.attr("y1", yScale(0))  
+			.attr("x2", graph_width+5)
+			.attr("y2", yScale(0));
+			
 
 		if (bool_left_graph) {
 			graph_select.append("text") // add x axis subtitle
 				.attr("class", "y_title")
 				.attr("text-anchor", "middle")
 				.attr("transform", "translate(-60," +var_height/2 + ") rotate(-90)")
-				.text("Age standardized (W) mortality rate per 100,000")
+				.text("Age-standardized (W) mortality rate per 100,000")
+		} else {
+			graph_select.append("text") // add x axis subtitle
+				.attr("class", "y_title")
+				.attr("text-anchor", "middle")
+				.attr("transform", "translate("+(graph_width+75)+"," +var_height/2 + ") rotate(-90)")
+				.text("Age-standardized (W) mortality rate per 100,000")
+			
 		}
 		
 
@@ -243,9 +236,11 @@
 		if (bool_left_graph) {
 			sex = 1
 			v_key = 0 //volume key for the array or nest data
+			axis_y_line = 0 
 		} else {
 			sex = 2
 			v_key = 1 
+			axis_y_line = graph_width
 		}
 		
 		graph_select = graph[v_key]
@@ -261,7 +256,19 @@
            .enter()
            .append("g")
 		   .attr("transform", function(d, i) {
-		   return "translate(" + xScale((i+1)*(bar_space+1)) + "," + yScale(d.rate1) + ")";}) 
+		   return "translate(" + xScale((i+1)*(bar_space+1)) + ",0)";}) 
+		   
+		nodes.append("line") // add line for each group
+			.style("stroke", "black")  
+			.attr("y1", yScale(0))  
+			.attr("y2", yScale(0) - var_height)
+			.style("opacity", 0.1);
+			
+	   nodes.append("line") // add tick for each group
+			.style("stroke", "black")  
+			.attr("y1", yScale(0) + 10)  
+			.attr("y2", yScale(0))
+			.style("opacity", 1);
 		    
 
 			
@@ -270,6 +277,7 @@
 			.attr("r", 20)
 			.style("stroke", function(d,i) {return color_cancer[d.cancer_label];})   // set the line colour
 			.style("stroke-width", 2)
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			.attr("fill", "none");
 			
 	   nodes.append("svg:path")
@@ -287,9 +295,7 @@
 		.attr("transform",  function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
 				var offset = Math.sign(update_range)*14
-				if (update_range  > 50 || update_range  < -50 ) {
-					return ( "translate(0," + ( offset)+ ")");
-				} 
+				return ( "translate(0," + ( offset + yScale(d.rate1))+ ")");
 		})
 
 		
@@ -300,12 +306,19 @@
 			.style("stroke-width", 2)				
 			.attr("y1", function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				return (Math.sign(update_range)*20)
+				return (Math.sign(update_range)*20) + yScale(d.rate1)
 			})
 			.attr("y2", function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				return (Math.sign(update_range)*20)
+				return (Math.sign(update_range)*20) + yScale(d.rate1)
 			});
+			
+		graph_select.append("line") // add line for x = 0
+			.style("stroke", "black")  
+			.attr("x1", axis_y_line)
+			.attr("y1", yScale(0))  
+			.attr("x2", axis_y_line)
+			.attr("y2", 0);
 
 			
 
@@ -314,18 +327,21 @@
 			.attr("r", 20)
 			.style("stroke", function(d,i) {return color_cancer[d.cancer_label];})    // set the line colour
 			.style("stroke-width", 2)
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];});
 		   
 		nodes.append("text")
 			.attr("class","text1")
 			.attr("text-anchor", "middle")
 			.text(function(d,i) {return d.rate1})
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			.attr("dy", "0.25em")
 			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];});    // set the line colour
 			
 		nodes.append("text")
 		    .attr("class","text2")
 			.attr("text-anchor", "middle")
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			.text(function(d,i) {return d.rate1})
 			.attr("dy", "0.25em")
 			.attr("fill", "#000000");    // set the line colour
@@ -333,10 +349,12 @@
 	   nodes.append("text")
 			.attr("class","cancer_label")
 			.attr("text-anchor", "middle")
-			.attr("y", function(d, i) {return  yScale(0)-yScale(d.rate1) + 20 })
+			.attr("y", function(d, i) {return  yScale(0) + 20 })
 			.text(function(d,i) {return d.cancer_label})
 			.attr("dy", "0.25em")
 			.attr("fill", "#000000");    // set the line colour
+			
+
 
 			
 		
@@ -355,6 +373,7 @@
 			.text(function(d,i) {
 				return d3.format("+.0%")((d.rate2-d.rate1)/d.rate1)
 			})
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			.attr("dy", "0.25em")
 			//.attr("fill", function(d,i) {return color_cancer[d.cancer_label];})
 			.attr("fill", "#000000")
@@ -369,6 +388,10 @@
 	function update(bool) {
 		
 
+			document.getElementById('radio_old').disabled = true;
+			document.getElementById('radio_new').disabled = true;
+			document.getElementById('radio_HDI1').disabled = true;
+			document.getElementById('radio_HDI2').disabled = true;
 			
 			update_circle(".bar_graph1", bool);
 			update_circle(".bar_graph2", bool);
@@ -408,22 +431,29 @@
 				else {
 					return 0;
 				}
-			});
+			})
+			.each("end", function() {
+				document.getElementById('radio_old').disabled = false;
+				document.getElementById('radio_new').disabled = false;
+				document.getElementById('radio_HDI1').disabled = false;
+				document.getElementById('radio_HDI2').disabled = false;});
 	}
 	
 	
 	function update_circle(bar_graph_class, bool) {
 	
 		var nodes = d3.select("#chart")
+		
+		
 			
 		nodes.selectAll(".circle2")
 			.transition().duration(transition_time).ease(ease_effect)
 			.attr("transform",function(d,i) {
 				if (bool) {
-					update_range = yScale(d.rate2)- yScale(d.rate1)
+					update_range = yScale(d.rate2)
 				}
 				else {
-					update_range = 0
+					update_range = yScale(d.rate1)
 				}
 				return "translate(0," + (update_range) + ")";
 			});
@@ -451,10 +481,10 @@
 				return temp_text})
 			.attr("transform",function(d,i) {
 				if (bool) {
-					update_range = yScale(d.rate2)- yScale(d.rate1)
+					update_range = yScale(d.rate2)
 				}
 				else {
-					update_range = 0
+					update_range = yScale(d.rate1)
 				}
 				return "translate(0," + (update_range) + ")";
 			});
@@ -478,11 +508,13 @@
 				if (bool) {
 					offset = Math.sign(update_range)*(-25)
 					if (update_range  > 50 || update_range  < -50 ) {
-						return(update_range + offset);
-					} 
+						return(yScale(d.rate2) + offset);
+					} else {
+						return(yScale(d.rate1) + offset);
+					}
 				}
 				else {
-					return(offset);
+					return(yScale(d.rate1) + offset);
 				}
 				
 			});
@@ -505,11 +537,14 @@
 				if (bool) {
 					 offset = Math.sign(update_range)* (-27)
 					if (update_range  > 50 || update_range  < -50 ) {
-						return ( "translate(0," + (update_range + offset)+ ")");
+						return ( "translate(0," + (yScale(d.rate2) + offset)+ ")");
+					}
+					else {
+						return ( "translate(0," + (yScale(d.rate1) +offset)+ ")");
 					}
 				}
 				else {
-					return ( "translate(0," + (offset)+ ")");
+					return ( "translate(0," + (yScale(d.rate1) +offset)+ ")");
 				}				
 			})
 			
@@ -518,12 +553,12 @@
 			.transition().duration(transition_time).ease(ease_effect)
 			.attr("transform",function(d,i) {
 				if (bool) {
-					var update_range = yScale(d.rate2)- yScale(d.rate1)
+					var update_range = (yScale(d.rate2) + yScale(d.rate1)) / 2
 				}
 				else {
-					var update_range = 0
+					var update_range = yScale(d.rate1)
 				}
-				return "translate(0," + (update_range/2) + ")";
+				return "translate(0," + (update_range) + ")";
 			})
 			.style("opacity",function() {
 				if (bool) {
@@ -540,6 +575,15 @@
 		
 		var file_use = "data/bochen_table_data.csv"; 
 		
+		if (group_value == 0) {
+			subtitle = "Very high HDI"
+		}
+		else {
+			subtitle = "Medium & High HDI"
+		}
+		
+		d3.select("#header").select(".desc").text(subtitle)
+	
 		d3.csv(file_use,
 			
 			function(d) {
@@ -556,6 +600,10 @@
 				};	
 			},		
 			function(data) {
+				
+				document.getElementById('radio_old').checked= true;
+				document.getElementById('radio_new').checked= false;
+
 			
 				var data_temp = data.filter(function(d){
 					return (d[group_label] == group_value)
@@ -570,9 +618,19 @@
 				
 				//add_axis_title(bar_graph,data_temp,true);
 				//add_axis_title(bar_graph,data_temp,false);
+				document.getElementById('radio_old').disabled = true;
+				document.getElementById('radio_new').disabled = true;
+				document.getElementById('radio_HDI1').disabled = true;
+				document.getElementById('radio_HDI2').disabled = true;
+				
+				if (document.getElementById('check_axis').checked) {
+					update_axis(bar_graph,data_temp,true);
+					update_axis(bar_graph,data_temp,false);
+				}
+
 				update_data_circle(bar_graph,data_temp, true);
 				update_data_circle(bar_graph,data_temp, false);
-				//add_legend(graph_legend);
+				update_legend( false);
 				
 
 			}
@@ -580,7 +638,101 @@
 			
 	}
 					
+	function update_axis(graph,data,bool_left_graph) {
+		
+		var y_max1 = d3.max(data, function(d) {return d.rate1})
+		var y_max2 = d3.max(data, function(d) {return d.rate2})
+		var y_max = d3.max([y_max1,y_max2])
+		var tick_list = tick_generator(y_max)
+		
+		yScale.domain([0,tick_list.value_top]); // update xscale domain
+		
+		if (bool_left_graph) {
+			v_key = 0 //volume key for the array or nest data
+			axis_orient = "left"
+			axis_x = 0
+			axis_tick1 = 10
+			axis_tick2 = 0
+			graph_title = "Males"
+		} else {
+			v_key = 1 
+			axis_orient = "right"
+			axis_x = graph_width
+			axis_tick1 = -graph_width
+			axis_tick2 = graph_width + 10
+			graph_title = "Females"
+		}
+		
+
+		var yAxis = d3.svg.axis() 
+			.scale(yScale)
+			.orient(axis_orient)
+			.tickSize(-graph_width, 0,0)
+			.tickPadding(12)
+			.tickValues(tick_list.major)	
 			
+					
+	    var yAxis_minor = d3.svg.axis() 
+			.scale(yScale)
+			.orient(axis_orient)
+			.tickSize(-graph_width, 0,0)
+			.tickPadding(12)
+			.tickValues(tick_list.minor)	
+			.tickFormat("")	;
+			
+		graph_select = graph[v_key]	
+		
+		graph_select  //  grid Major transition
+		   .selectAll(".yaxis")
+           .transition().duration(transition_time).ease(ease_effect)  
+           .call(yAxis); 
+
+		graph_select //  grid Minor transition
+		   .selectAll(".yaxis_minor")
+            .transition().duration(transition_time).ease(ease_effect)
+           .call(yAxis_minor);  
+		
+		
+		
+		// update tick position major
+		 var xgrid_major=graph_select.selectAll(".tick_major")
+			.data(tick_list.major, function(d) { return d; })
+			
+		xgrid_major.transition().duration(transition_time).ease(ease_effect)
+			.attr("y1", function(d) {return yScale(d); })
+			.attr("y2", function(d) {return yScale(d); })
+					
+		xgrid_major.exit().remove()
+			
+		xgrid_major.enter()
+			.append("line")
+			.attr("class", "tick_major")
+			.attr("stroke", "black")
+			.attr("x2",  axis_tick2 )
+		    .attr("x1", -axis_tick1)
+			.attr("y1", function(d) { return yScale(d); })
+			.attr("y2", function(d) { return yScale(d); })
+			
+		var xgrid_minor=graph_select.selectAll(".tick_minor")
+			.data(tick_list.minor, function(d) { return d; })		
+			
+		 xgrid_minor.transition().duration(transition_time).ease(ease_effect)
+			.attr("y1", function(d) { return yScale(d); })
+			.attr("y2", function(d) { return yScale(d); })
+		
+		xgrid_minor.exit().remove()
+					
+		xgrid_minor.enter()
+			.append("line")
+			.attr("class", "tick_minor")
+			.attr("stroke", "black")
+			.attr("x2",  axis_tick2)
+			.attr("x1", -axis_tick1)
+			.attr("y2", function(d) { return yScale(d); })
+			.attr("y1", function(d) { return yScale(d); })
+		
+	
+	}		
 	function update_data_circle(graph, data,bool_left_graph) {
 		
 		if (bool_left_graph) {
@@ -596,13 +748,94 @@
 			return (d.sex==sex)
 		});
 		
+		graph_select.selectAll(".circle1")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+			.style("stroke", function(d,i) {return color_cancer[d.cancer_label];})   
+			.attr("transform", function(d, i) {
+				return "translate(" + 0 + "," + yScale(d.rate1) + ")";
+			}); 
+		
 		graph_select.selectAll(".circle2")
 			.data(data_temp)
 			.transition().duration(transition_time).ease(ease_effect)
 			.attr("transform", function(d, i) {
 				return "translate(" + 0 + "," + yScale(d.rate1) + ")";
-			}); 
+			})
+			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];});
+			
+		graph_select.selectAll(".arrow_link")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];})
+			.attr("d", function(d,i) {
+				var update_range = yScale(d.rate2)- yScale(d.rate1)
+				if (update_range > 0) {
+					return (d3.svg.symbol().type("triangle-down")(10,1))
+				} 
+				else {
+					return (d3.svg.symbol().type("triangle-up")(10,1))
+				}
+			})
+			.attr("transform",  function(d,i) {
+				var update_range = yScale(d.rate2)- yScale(d.rate1)
+				var offset = Math.sign(update_range)*14
+				return ( "translate(0," + ( offset + yScale(d.rate1))+ ")");	
+			})
+			.style("opacity",1);
 		
+		graph_select.selectAll(".line_link")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+	  		.style("stroke", function(d,i) {return color_cancer[d.cancer_label];}) 			
+			.attr("y1", function(d,i) {
+				var update_range = yScale(d.rate2)- yScale(d.rate1)
+				return ((Math.sign(update_range)*20) + yScale(d.rate1))
+			})
+			.attr("y2", function(d,i) {
+				var update_range = yScale(d.rate2)- yScale(d.rate1)
+				return ((Math.sign(update_range)*20) + yScale(d.rate1))
+			})
+			.style("opacity",1);
+			
+		graph_select.selectAll(".text1")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+			.text(function(d,i) {return d.rate1})
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
+			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];});    // set the line colour
+			
+		graph_select.selectAll(".text2")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
+			.text(function(d,i) {return d.rate1})
+
+			
+		graph_select.selectAll(".cancer_label")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+			.text(function(d,i) {return d.cancer_label})
+
+		
+		graph_select.selectAll(".text_percent")
+			.data(data_temp)
+			.transition().duration(transition_time).ease(ease_effect)
+			.attr("x",function(d,i) {
+				var update_range = yScale(d.rate2)- yScale(d.rate1)
+				if (update_range  > 50 || update_range  < -50 ) {
+					return 8;
+				}
+				else {
+					return 22;
+				}
+			})
+			.text(function(d,i) {
+				return d3.format("+.0%")((d.rate2-d.rate1)/d.rate1)
+			})
+			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
+			.style("opacity",0); 
+			
 	}
 	
 	
