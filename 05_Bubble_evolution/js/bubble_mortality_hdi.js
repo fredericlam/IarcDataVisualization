@@ -206,9 +206,9 @@
 		graph_select.append("line") // add line for y = 0
 			.style("stroke", "black")  
 			.attr("x1", 0)
-			.attr("y1", yScale(0))  
+			.attr("y1", var_height)  
 			.attr("x2", graph_width+5)
-			.attr("y2", yScale(0));
+			.attr("y2", var_height);
 			
 
 		if (bool_left_graph) {
@@ -260,14 +260,14 @@
 		   
 		nodes.append("line") // add line for each group
 			.style("stroke", "black")  
-			.attr("y1", yScale(0))  
-			.attr("y2", yScale(0) - var_height)
+			.attr("y1", var_height)  
+			.attr("y2", 0)
 			.style("opacity", 0.1);
 			
 	   nodes.append("line") // add tick for each group
 			.style("stroke", "black")  
-			.attr("y1", yScale(0) + 10)  
-			.attr("y2", yScale(0))
+			.attr("y1", var_height + 10)  
+			.attr("y2", var_height)
 			.style("opacity", 1);
 		    
 
@@ -316,7 +316,7 @@
 		graph_select.append("line") // add line for x = 0
 			.style("stroke", "black")  
 			.attr("x1", axis_y_line)
-			.attr("y1", yScale(0))  
+			.attr("y1", var_height)  
 			.attr("x2", axis_y_line)
 			.attr("y2", 0);
 
@@ -349,7 +349,7 @@
 	   nodes.append("text")
 			.attr("class","cancer_label")
 			.attr("text-anchor", "middle")
-			.attr("y", function(d, i) {return  yScale(0) + 20 })
+			.attr("y", function(d, i) {return  var_height + 20 })
 			.text(function(d,i) {return d.cancer_label})
 			.attr("dy", "0.25em")
 			.attr("fill", "#000000");    // set the line colour
@@ -839,6 +839,7 @@
 	}
 	
 	
+	
 	function tick_generator(value_max, value_min = 0, log_scale=false )	{
 	//generate tick on the axis 
 		//max of the value
@@ -851,6 +852,7 @@
 		tick_list.major = [];
 		tick_list.minor = [];
 		tick_list.value_top = value_max; // Will change according to the last tick
+		tick_list.value_bottom = value_min; // Will change according to the first tick
 			
 		var log_max = Math.pow(10,Math.floor(Math.log10(value_max))); // order of magnitude of max (power of 10)
 		var unit_floor_max = Math.floor(value_max/log_max) // left digit of max 
@@ -889,14 +891,21 @@
 		} else {
 		
 			var temp = 0;
-			var log_min = Math.pow(10,Math.floor(Math.log10(value_min))); // order of magnitude of max (power of 10)
-			var unit_floor_min = Math.floor(value_min/log_min) // left digit of max 
+			var log_min = Math.pow(10,Math.floor(Math.log10(value_min))); // order of magnitude of min (power of 10)
+			var unit_floor_min = Math.floor(value_min/log_min) // left digit of min 
 			
 			if (log_min == log_max) { // if min and max same magnitude
 			
-				for (var i = unit_floor_min; i <= unit_floor_max+1; i++) {
-					temp = i*log_min;
-					tick_list.major.push(temp);
+				for (var i = unit_floor_min-1; i <= unit_floor_max+1; i++) {
+					
+					if (i == 0) {
+						temp=9*(log_min/10)
+						tick_list.major.push(temp);
+					} else {
+						temp = i*log_min;
+						tick_list.major.push(temp);
+					}
+
 				}
 				if (unit_floor_min == unit_floor_max) { // min and max same first digit
 				
@@ -926,12 +935,21 @@
 				
 				}
 				else {
-					tick_list.major.push(unit_floor_min*log_min);
+					tick_list.major.push((unit_floor_min)*log_min);
 				}
 				
-				for (var i = unit_floor_min; i <= 19; i++) {
-						temp = (i*log_min); 
-						tick_list.minor.push(temp);
+				for (var i = unit_floor_min-1; i <= 19; i++) {
+					
+						if (i == 0) {
+							temp=9*(log_min/10)
+							tick_list.minor.push(temp);
+						} 
+						else {
+							temp = (i*log_min); 
+							tick_list.minor.push(temp);
+						}
+						
+
 				}
 				
 				while (log_min != (log_max/10)) {
@@ -993,9 +1011,16 @@
 					tick_list.major.push(7*log_min);	
 				}
 				
-				for (var i = unit_floor_min; i <= 9; i++) {
-						temp = (i*log_min); 
-						tick_list.minor.push(temp);
+				for (var i = unit_floor_min-1; i <= 9; i++) {
+					
+						if (i == 0) {
+							temp=9*(log_min/10)
+							tick_list.minor.push(temp);
+						} 
+						else {
+							temp = (i*log_min); 
+							tick_list.minor.push(temp);
+						}
 				}
 				
 				while (log_min != (log_max/10)) {
@@ -1041,8 +1066,12 @@
 		var max_major = tick_list.major[tick_list.major.length-1];
 		var max_minor = tick_list.minor[tick_list.minor.length-1];
 		
+		var min_major = tick_list.major[0];
+		var min_minor = tick_list.minor[0]
+		
 		
 		tick_list.value_top = Math.max(max_major,max_minor)	
+		tick_list.value_bottom = Math.min(min_major,min_minor)	
 		}
 	return (tick_list)
 	}

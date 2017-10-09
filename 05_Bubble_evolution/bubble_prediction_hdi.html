@@ -55,11 +55,11 @@
 	// I define xScale and Xaxis's here because I want them as general variable 
 	// So I need to use the value for the Canada Men..
 	// I suppose there should be another way, to define them in the d3.csv fonction and use the data..
-	var yScale = d3.scale.linear()
+	
+	var yScale = d3.scale.linear() 
 		.domain([0, 100]) 
 		.range([var_height  ,0]);
 		
-
 		
 	
 	 window.onload = function()
@@ -99,6 +99,11 @@
 		<br/>
 		<label><input type="radio" id="radio_new" name="time"   onChange="update(true)"> 2035</label>
 		</form>
+		
+		<div >
+		<form>
+		<label><input type="checkbox" id="check_scale"  name="scale_update" onChange="update_scale()">Log scale</label>
+		</form
 		
 
 		
