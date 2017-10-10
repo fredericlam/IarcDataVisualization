@@ -701,7 +701,7 @@
 				.range([var_height  ,0]);
 		}
 		
-		console.log(tick_list)
+		//console.log(tick_list)
 		
 		
 		if (bool_left_graph) {
@@ -1032,8 +1032,12 @@
 		function(data) {
 			
 			bool_hdi = document.getElementById('radio_HDI1').checked;	
+
+			var data_src = d3.nest()
+        		.key( function(d){ return d.hdi_group ;  })
+        		.key( function(d){ return d.sex ;  })
+        		.entries( data )  ; 
 			
-			console.log(bool_hdi)
 			var data_temp = data.filter(function(d){
 				if(bool_hdi) {
 					return (d.hdi_group == 0)
@@ -1056,8 +1060,8 @@
 		
 		update_axis(bar_graph,data_temp,true, bool);
         update_axis(bar_graph,data_temp,false,bool);
-		update_data_circle(bar_graph,data_temp, true);
-        update_data_circle(bar_graph,data_temp, false);
+		update_data_circle(bar_graph,data_temp, true,data_src);
+        update_data_circle(bar_graph,data_temp, false,data_src);
 			
 		document.getElementById('check_axis').checked = true;
 		
