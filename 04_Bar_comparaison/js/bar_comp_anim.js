@@ -139,6 +139,7 @@
 			.attr("y2", graph_height+6)
 			.attr("x1", function(d) { return xScale(d); })
 			.attr("x2", function(d) { return xScale(d); })
+				
 
 
 		graph_select.append("text") // add x axis subtitle
@@ -180,50 +181,116 @@
 					return "translate(0," + graph_height + ")";
 				}	
 			})
-			.attr("opacity" ,function(d,i) { // if rank > 10, not show
-				var rank = d.values[v_key].values[0].rank
-				if (rank < nb_cancer+1) {
+
+			 
+		cancer_group.append("text")
+			.attr("id",function(d) {return "id" + (v_key+1) + "_" + d.values[0].values[0].cancer_label; // Need the id, to after know the size of the text
+			})
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("label" + (v_key+1) +" U"+(update_rank))
+			})
+			.attr("text-anchor", "end")
+			.attr("transform", function (d,i) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var rank_diff = (rank2-rank1)
+				if (bool_left_graph) {
+					return ("translate(-5,0)");
+				} 
+				else {
+					if (rank2 < nb_cancer+1) {
+						return ("translate("+(-5-graph_separation+margin.left_page)+"," + (yScale(-rank_diff+(bar_space*(-rank_diff)))+YgridSize) + ")");
+					}
+					else {
+						return ("translate("+(-5-graph_separation+margin.left_page)+"," + ((yScale(rank1+(bar_space*(rank1-1)))-graph_height)) + ")");
+					}
+
+				}
+				
+			})
+			.style("opacity" ,function(d,i) { // if rank > 10, not show
+				if (bool_left_graph) {
+					var rank1 = d.values[0].values[0].rank
+					if (rank1 < nb_cancer+1) { 
+						return 1;
+						}
+					else {
+						return 0;
+					}
+				}
+			 })
+			.each(function (d) { // to use the wrap label fonction 
+				var lines = wordwrap(d.values[0].values[0].cancer_label, label_wrap)
+				for (var i = 0; i < lines.length; i++) {
+					d3.select(this).append("tspan").attr("dy",0).attr("x",0).attr("y",YgridSize/Math.pow(3/2, lines.length)+i*15).text(lines[i])
+					}
+			})
+
+			
+		cancer_group.append("rect")
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("rect" + (v_key+1) +" U"+(update_rank))
+			})				// add class to select by class, for the update 
+			.attr("x", function() {
+				if (bool_left_graph) {
+					return(0)
+				} 
+				else {
+					return (-graph_separation+margin.left_page)
+				}
+			})
+			.attr("y", function(d,i) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var rank_diff = (rank2-rank1)
+				if (bool_left_graph) {
+					return (0);
+				} 
+				else {
+					if (rank2 < nb_cancer+1) {
+						return (yScale(-rank_diff+(bar_space*(-rank_diff)))+YgridSize);
+					}
+					else {
+						return (yScale(rank1+(bar_space*(rank1-1)))-graph_height);
+					}
+
+				}
+				
+			})
+			.attr("rx", 0)
+			.attr("ry", 0)
+			.attr("width", function(d,i) {return xScale(d.values[0].values[0].asr);})
+			.attr("height", YgridSize)
+			.attr("fill", "#2c7bb6")
+			.style("opacity" ,function(d,i) { // if rank > 10, not show
+				var rank1 = d.values[0].values[0].rank
+				if (rank1 < nb_cancer+1) { 
 					return 1;
 					}
 				else {
 					return 0;
 				}
 			 });
-			 
-		cancer_group.selectAll("text") // add cancer_label to group
-			.data(function(d) {return d.values[v_key].values})	
-			.enter()
-			.append("text")
-			.attr("id",function(d) {
-				return "id" + (v_key+1) + "_" + d.cancer_label; // Need the id, to after know the size of the text
-			})
-			.attr("class", "label")
-			.attr("text-anchor", "end")
-			.attr("transform", "translate(-5,0)")
-			.each(function (d) { // to use the wrap label fonction 
-				var lines = wordwrap(d.cancer_label, label_wrap)
-				for (var i = 0; i < lines.length; i++) {
-					d3.select(this).append("tspan").attr("dy",0).attr("x",0).attr("y",YgridSize/Math.pow(3/2, lines.length)+i*15).text(lines[i])
-					}
-			});	
-			
-		cancer_group.selectAll("rect") // add bar to group
-			.data(function(d) {return d.values[v_key].values})		
-			.enter()
-			.append("rect")
-			.attr("x", 0)
-			.attr("y", 0)
-			.attr("rx", 0)
-			.attr("ry", 0)
-			.attr("width", function(d,i) {return xScale(d.asr);})
-			.attr("height", YgridSize)
-			.attr("fill", "#2c7bb6")
-			
+		 	
 		cancer_group.append("line")  // add line to group (diferent of left and right graph)
-			.attr("class","line" + (v_key+1)) // add class to select by class, for the update 
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("line" + (v_key+1) +" U"+(update_rank))
+			})		 // add class to select by class, for the update 
 			.attr("x1", function(d,i) { 
 				if (bool_left_graph) {
-					return xScale(d.values[v_key].values[0].asr)+5;
+					var temp_id = "id1_" + d.values[0].values[0].cancer_label;
+					var temp = document.getElementById(temp_id).getBBox().width;
+					return -(temp+10)
+					//return xScale(d.values[v_key].values[0].asr)+5;
 				} else {
 					return -line_separation;
 					
@@ -233,11 +300,15 @@
 			.attr("y2", YgridSize/2)
 			.attr("x2",  function(d,i) { 
 				if (bool_left_graph) {
-					return var_width;
+					var temp_id = "id1_" + d.values[0].values[0].cancer_label;
+					var temp = document.getElementById(temp_id).getBBox().width;
+					return -(temp+10)
+					//return var_width;
 				} else {
 					var temp_id = "id2_" + d.values[v_key].values[0].cancer_label;
 					var temp = document.getElementById(temp_id).getBBox().width;
-					return -(temp+10);	
+					return -line_separation;
+					//return -(temp+10);	
 				}
 			})
 			.attr("stroke-width", 0.5)
@@ -252,8 +323,10 @@
 				} else {
 					return "black"
 				}
-			});	
-
+			})
+			.style("opacity", 0)
+				
+			
 		graph_select.append("line") // add line for x = 0
 			.style("stroke", "black")  
 			.attr("x1", 0)    
@@ -266,7 +339,7 @@
 			.attr("x1", 0)    
 			.attr("y1", graph_height)  
 			.attr("x2", var_width)  
-			.attr("y2", graph_height);			
+			.attr("y2", graph_height);
 		
 	}
 	
@@ -275,13 +348,11 @@
 		// graph to add the line (Add the left graph) 
 		// data 
 		
-
-		
 		var line_link =  bar_graph.selectAll()
 			.data(data_nest)
 			.enter()
 			.append("g")
-			.attr("class","link1") // add class to select by class, for the update 
+			.attr("class","link_line") // add class to select by class, for the update 
 			.attr("transform",function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
@@ -293,7 +364,7 @@
 					return "translate(0," + graph_height + ")";
 				}
 				})
-			.attr("opacity" ,function(d,i) {
+			.style("opacity" ,function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				var rank_min = Math.min(rank1,rank2)
@@ -306,12 +377,28 @@
 			});
 			
 		line_link.append("line")
-			.attr("class","line_link")
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("link" + (v_key+1) +" U"+(update_rank))
+			})
 			.attr("x1", function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
 					// position if left cancer > 10
+					return (graph_separation-margin.left_page)-(line_separation)-30;
+				}
+				else {
+					return var_width;
+				}
+			})
+			.attr("x2",  function(d,i) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				// position if right cancer > 10
+				if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
 					return (graph_separation-margin.left_page)-(line_separation)-30;
 				}
 				else {
@@ -329,34 +416,19 @@
 					return YgridSize/2;
 				}
 			})
-			.attr("x2",  function(d,i) {
-				var rank1 = d.values[0].values[0].rank
-				var rank2 = d.values[1].values[0].rank
-				// position if right cancer > 10
-				if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-					return var_width+40;
-				}
-				else {
-					return (graph_separation-margin.left_page)-(line_separation);
-				}
-			})
 			.attr("y2",function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				var rank_min = Math.min(rank1,rank2)
 				var rank_diff = (rank2-rank1)+1
-				if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-					// position if right cancer > 10
+				if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
+					// position if left cancer > 10
 					return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
-				} else if (rank_min > nb_cancer) {
-					// position if both cancer > 10
-					return YgridSize/2;
 				}
 				else {
-					// position based on difference
-					return yScale(rank_diff+(bar_space*(rank_diff-1)))+YgridSize/2;
+					return YgridSize/2;
 				}
-				})
+			})
 			.attr("stroke-width", 0.5)
 			.attr("stroke", function(d,i) {
 				var rank1 = d.values[0].values[0].rank
@@ -371,7 +443,373 @@
 				}
 			});
 	}
+
+
+	function update_bar_new() 
+	{
 		
+		
+		var bar = d3.select("#chart") // select by class
+		
+		
+		var t0 = bar.transition().duration(transition_time/2).ease("linear");
+		
+		
+		t0.selectAll(".rect2.U1")
+		.attr("x", -graph_separation+var_width+margin.left_page)
+		.attr("width", function(d,i) {return xScale(d.values[1].values[0].asr);})
+		.transition().duration(transition_time/2).ease("linear")
+		.attr("x", 0)
+		.attr("y", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			return (0)
+		})
+		.style("opacity", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) {
+				return(1);
+			}
+			else {
+				return(0);
+			}
+			
+		});
+		
+		t0.selectAll(".label2.U1")
+		.attr("transform", function(d) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			var rank_diff = (rank2-rank1)
+			if (rank2 < nb_cancer+1) {
+				return ("translate("+(-5-graph_separation+margin.left_page+var_width)+"," + (yScale(-rank_diff+(bar_space*(-rank_diff)))+YgridSize) + ")");
+			}
+			else {
+				return ("translate("+(-5-graph_separation+margin.left_page+var_width)+"," + ((yScale(rank1+(bar_space*(rank1-1)))-graph_height)) + ")");
+
+			}
+		})
+		.transition().duration(transition_time/2).ease("linear")
+		.attr("transform", "translate(-5,0)")
+		.style("opacity", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) {
+				return(1);
+			}
+			else {
+				return(0);
+			}
+			
+		});
+		
+		t0.selectAll(".line1.U1")
+		.attr("x1",function(d) {
+			return xScale(d.values[0].values[0].asr)+5
+		})
+		.attr("x2", var_width)
+		.style("opacity" ,function(d,i) { 
+			var rank1 = d.values[0].values[0].rank
+			if (rank1 < nb_cancer+1) { 
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		 });	
+		 
+
+	 
+		t0.transition().selectAll(".link2.U1")
+		.attr("x2",  function(d,i) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			// position if right cancer > 10
+			if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
+				return var_width+40;
+			}
+			else {
+				var temp_id = "id2_" + d.values[1].values[0].cancer_label;
+				var temp = document.getElementById(temp_id).getBBox().width;
+				return (graph_separation-margin.left_page-line_separation);
+			}
+		})
+		.attr("y2",function(d,i) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			var rank_min = Math.min(rank1,rank2)
+			var rank_diff = (rank2-rank1)+1
+			if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
+				// position if right cancer > 10
+				return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
+			} else if (rank_min > nb_cancer) {
+				// position if both cancer > 10
+				return YgridSize/2;
+			}
+			else {
+				// position based on difference
+				return yScale(rank_diff+(bar_space*(rank_diff-1)))+YgridSize/2;
+			}
+		})
+		
+		t0.transition().selectAll(".line2.U1")
+		.attr("x2",  function(d,i) { 
+				var temp_id = "id2_" + d.values[1].values[0].cancer_label;
+				var temp = document.getElementById(temp_id).getBBox().width;
+				return -(temp+10);	
+			
+			})
+		.style("opacity" ,function(d,i) { 
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) { 
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		 });	
+		
+		
+		
+		
+
+
+		var t1 = t0.delay(500).transition().transition();
+		t1.selectAll(".rect2.U0")
+		.attr("x", -graph_separation+var_width+margin.left_page)
+		.attr("width", function(d,i) {return xScale(d.values[1].values[0].asr);})
+		.transition().duration(transition_time/2).ease("linear")
+		.attr("x", 0)
+		.attr("y", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			//return (yScale(rank2 + (bar_space*(rank2-1))))
+			return (0)
+		})
+		.style("opacity", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) {
+				return(1);
+			}
+			else {
+				return(0);
+			}
+			
+		});
+		
+		t1.selectAll(".label2.U0")
+		.attr("transform", function(d) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			var rank_diff = (rank2-rank1)
+			if (rank2 < nb_cancer+1) {
+				return ("translate("+(-5-graph_separation+margin.left_page+var_width)+"," + (yScale(-rank_diff+(bar_space*(-rank_diff)))+YgridSize) + ")");
+			}
+			else {
+				return ("translate("+(-5-graph_separation+margin.left_page+var_width)+"," + ((yScale(rank1+(bar_space*(rank1-1)))-graph_height)) + ")");
+
+			}
+		})
+		.transition().duration(transition_time/2).ease("linear")
+		.attr("transform", "translate(-5,0)")
+		.style("opacity", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) {
+				return(1);
+			}
+			else {
+				return(0);
+			}
+			
+		});
+		
+		t1.selectAll(".line1.U0")
+		.attr("x1",function(d) {
+			return xScale(d.values[0].values[0].asr)+5
+		})
+		.attr("x2", var_width)
+		.style("opacity" ,function(d,i) { 
+			var rank1 = d.values[0].values[0].rank
+			if (rank1 < nb_cancer+1) { 
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		});
+		
+
+		
+		t1.transition().selectAll(".link2.U0")
+		.attr("x2",  function(d,i) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			// position if right cancer > 10
+			if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
+				return var_width+40;
+			}
+			else {
+				var temp_id = "id2_" + d.values[1].values[0].cancer_label;
+				var temp = document.getElementById(temp_id).getBBox().width;
+				return (graph_separation-margin.left_page-line_separation);
+			}
+		})
+		.attr("y2",function(d,i) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			var rank_min = Math.min(rank1,rank2)
+			var rank_diff = (rank2-rank1)+1
+			if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
+				// position if right cancer > 10
+				return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
+			} else if (rank_min > nb_cancer) {
+				// position if both cancer > 10
+				return YgridSize/2;
+			}
+			else {
+				// position based on difference
+				return yScale(rank_diff+(bar_space*(rank_diff-1)))+YgridSize/2;
+			}
+		})
+		
+		t1.transition().selectAll(".line2.U0")
+		.attr("x2",  function(d,i) { 
+				var temp_id = "id2_" + d.values[1].values[0].cancer_label;
+				var temp = document.getElementById(temp_id).getBBox().width;
+				return -(temp+10);	
+			
+			})
+		.style("opacity" ,function(d,i) { 
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) { 
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		 });
+		
+
+
+		
+		var t2 = t0.delay(1000).transition().transition().transition().transition();
+		t2.selectAll(".rect2.U-1")
+		.attr("x", -graph_separation+var_width+margin.left_page)
+		.attr("width", function(d,i) {return xScale(d.values[1].values[0].asr);})
+		.transition().duration(transition_time/2).ease("linear")
+		.attr("x", 0)
+		.attr("y", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			//return (yScale(rank2 + (bar_space*(rank2-1))))
+			return (0)
+		})
+		.style("opacity", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) {
+				return(1);
+			}
+			else {
+				return(0);
+			}
+			
+		});
+		
+		t2.selectAll(".label2.U-1")
+		.attr("transform", function(d) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			var rank_diff = (rank2-rank1)
+			if (rank2 < nb_cancer+1) {
+				return ("translate("+(-5-graph_separation+margin.left_page+var_width)+"," + (yScale(-rank_diff+(bar_space*(-rank_diff)))+YgridSize) + ")");
+			}
+			else {
+				return ("translate("+(-5-graph_separation+margin.left_page+var_width)+"," + ((yScale(rank1+(bar_space*(rank1-1)))-graph_height)) + ")");
+
+			}
+		})
+		.transition().duration(transition_time/2).ease("linear")
+		.attr("transform", "translate(-5,0)")
+		.style("opacity", function(d,i) {
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) {
+				return(1);
+			}
+			else {
+				return(0);
+			}
+			
+		});
+		
+		t2.selectAll(".line1.U-1")
+		.attr("x1",function(d) {
+			return xScale(d.values[0].values[0].asr)+5
+		})
+		.attr("x2", var_width)
+		.style("opacity" ,function(d,i) { 
+			var rank1 = d.values[0].values[0].rank
+			if (rank1 < nb_cancer+1) { 
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		});
+		
+		t2.transition().selectAll(".link2.U-1")
+		.attr("x2",  function(d,i) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			// position if right cancer > 10
+			if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
+				return var_width+40;
+			}
+			else {
+				var temp_id = "id2_" + d.values[1].values[0].cancer_label;
+				var temp = document.getElementById(temp_id).getBBox().width;
+				return (graph_separation-margin.left_page-line_separation);
+			}
+		})
+		.attr("y2",function(d,i) {
+			var rank1 = d.values[0].values[0].rank
+			var rank2 = d.values[1].values[0].rank
+			var rank_min = Math.min(rank1,rank2)
+			var rank_diff = (rank2-rank1)+1
+			if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
+				// position if right cancer > 10
+				return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
+			} else if (rank_min > nb_cancer) {
+				// position if both cancer > 10
+				return YgridSize/2;
+			}
+			else {
+				// position based on difference
+				return yScale(rank_diff+(bar_space*(rank_diff-1)))+YgridSize/2;
+			}
+		})
+		
+		t2.transition().selectAll(".line2.U-1")
+		.attr("x2",  function(d,i) { 
+				var temp_id = "id2_" + d.values[1].values[0].cancer_label;
+				var temp = document.getElementById(temp_id).getBBox().width;
+				return -(temp+10);	
+			
+			})
+		.style("opacity" ,function(d,i) { 
+			var rank2 = d.values[1].values[0].rank
+			if (rank2 < nb_cancer+1) { 
+				return 1;
+				}
+			else {
+				return 0;
+			}
+		 });
+		
+		
+		
+		
+		
+		
+	}
+	
+
+	
 	function update(data) {
 	// Update the graph
 		// data 
@@ -496,61 +934,164 @@
 		
 		if (bool_left_graph) {
 			var bar_class = ".bar1";
+			var rect_class = ".rect1";
 			var line_class = ".line1";
+			var label_class = ".label1";
 			var v_key = 0;
 		} else {
 			var bar_class = ".bar2";
+			var rect_class = ".rect2";
 			var line_class = ".line2";
+			var label_class = ".label2";
 			var v_key = 1;
 		}
 		
-		var bar = d3.select("#chart").selectAll(bar_class) // select by class
+		d3.select("#chart").selectAll(bar_class) // select by class
+		.data(data_nest)
+		.transition().duration(transition_time)	
+		.attr("transform",function(d,i) {
+			var rank = d.values[v_key].values[0].rank
+			if (rank < nb_cancer+1) {
+				return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
+			} else {
+			// if not show place them just under the graph
+				return "translate(0," + graph_height + ")";
+			}
+		})
+		
+			d3.select("#chart").selectAll(label_class)
 			.data(data_nest)
-			
-		bar.transition().duration(transition_time)	
-			.attr("transform",function(d,i) {
-				var rank = d.values[v_key].values[0].rank
-				if (rank < nb_cancer+1) {
-					return "translate(0," + yScale(rank + (bar_space*(rank-1))) + ")";
-				} else {
-				// if not show place them just under the graph
-					return "translate(0," + graph_height + ")";
-				}
+			.transition().duration(transition_time)	
+			.attr("id",function(d) {return "id" + (v_key+1) + "_" + d.values[0].values[0].cancer_label; // Need the id, to after know the size of the text
 			})
-			.attr("opacity" ,function(d,i) {
-				var rank = d.values[v_key].values[0].rank
-				if (rank < nb_cancer+1) {
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("label" + (v_key+1) +" U"+(update_rank))
+			})
+			.attr("text-anchor", "end")
+			.attr("transform", function (d,i) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var rank_diff = (rank2-rank1)
+				if (bool_left_graph) {
+					return ("translate(-5,0)");
+				} 
+				else {
+					if (rank2 < nb_cancer+1) {
+						return ("translate("+(-5-graph_separation+margin.left_page)+"," + (yScale(-rank_diff+(bar_space*(-rank_diff)))+YgridSize) + ")");
+					}
+					else {
+						return ("translate("+(-5-graph_separation+margin.left_page)+"," + ((yScale(rank1+(bar_space*(rank1-1)))-graph_height)) + ")");
+					}
+
+				}
+				
+			})
+			.style("opacity" ,function(d,i) { // if rank > 10, not show
+				var rank1 = d.values[0].values[0].rank
+				if (rank1 < nb_cancer+1) { 
 					return 1;
 					}
 				else {
 					return 0;
 				}
-			});
+			 })
+
+
 		  
-		bar.selectAll("rect")
-			.data(function(d) {return d.values[v_key].values;})
+		d3.select("#chart").selectAll(rect_class)
+			.data(data_nest)
 			.transition().duration(transition_time)	
-			.attr("width", function(d,i) { return xScale(d.asr);})
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("rect" + (v_key+1) +" U"+(update_rank))
+			})
+			.attr("x", function() {
+				if (bool_left_graph) {
+					return(0)
+				} 
+				else {
+					return (-graph_separation+margin.left_page)
+				}
+			})
+			.attr("y", function(d,i) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var rank_diff = (rank2-rank1)
+				if (bool_left_graph) {
+					return (0);
+				} 
+				else {
+					if (rank2 < nb_cancer+1) {
+						return (yScale(-rank_diff+(bar_space*(-rank_diff)))+YgridSize);
+					}
+					else {
+						return (yScale(rank1+(bar_space*(rank1-1)))-graph_height);
+					}
+
+				}
+				
+			})
+			.attr("width", function(d,i) {return xScale(d.values[0].values[0].asr);})
 			.attr("fill", function(d,i) { 
-				if (d.sex == 1) {
+				if (d.values[0].values[0].sex == 1) {
 					return "#2c7bb6";
 				} else {
 					return "#b62ca1";
 				}	
-			});
+			})
+			.style("opacity" ,function(d,i) { // if rank > 10, not show
+				var rank1 = d.values[0].values[0].rank
+				if (rank1 < nb_cancer+1) { 
+					return 1;
+					}
+				else {
+					return 0;
+				}
+			 });
 			
 
 		d3.select("#chart").selectAll(line_class)
 			.data(data_nest)
 			.transition().duration(transition_time)	
-			.attr("x1", function(d,i) {
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("line" + (v_key+1) +" U"+(update_rank))
+			})		 // add class to select by class, for the update 
+			.attr("x1", function(d,i) { 
 				if (bool_left_graph) {
-					return xScale(d.values[0].values[0].asr)+5;
+					var temp_id = "id1_" + d.values[0].values[0].cancer_label;
+					var temp = document.getElementById(temp_id).getBBox().width;
+					return -(temp+10)
+					//return xScale(d.values[v_key].values[0].asr)+5;
 				} else {
 					return -line_separation;
+					
 				}
-			})	
-			.attr("stroke", function(d,i) {
+			})
+			.attr("y1", YgridSize/2)
+			.attr("y2", YgridSize/2)
+			.attr("x2",  function(d,i) { 
+				if (bool_left_graph) {
+					var temp_id = "id1_" + d.values[0].values[0].cancer_label;
+					var temp = document.getElementById(temp_id).getBBox().width;
+					return -(temp+10)
+					//return var_width;
+				} else {
+					var temp_id = "id2_" + d.values[v_key].values[0].cancer_label;
+					var temp = document.getElementById(temp_id).getBBox().width;
+					return -line_separation;
+					//return -(temp+10);	
+				}
+			})
+			.attr("stroke-width", 0.5)
+			.attr("stroke", function(d,i) { // add color to line 
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				var rank_diff = rank2-rank1;
@@ -561,7 +1102,8 @@
 				} else {
 					return "black"
 				}
-			});
+			})
+			.style("opacity", 0)
 		
 	}
 	
@@ -569,23 +1111,21 @@
 	// Update line linking the graph 
 		// data 
 		
-		var link_line = d3.select("#chart").selectAll(".link1")
+		 d3.select("#chart").selectAll(".link_line")
 			.data(data_nest)
-		
-		link_line
 			.transition().duration(transition_time)
 			.attr("transform",function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				var rank_min = Math.min(rank1,rank2)
-				if (rank_min < nb_cancer+1) {
+				if (rank_min < nb_cancer+1) { 
 					return "translate(0," + yScale(rank1 + (bar_space*(rank1-1))) + ")";
 				} else {
 					// if not show place them just under the graph
 					return "translate(0," + graph_height + ")";
 				}
 			})
-			.attr("opacity" ,function(d,i) {
+			.style("opacity" ,function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				var rank_min = Math.min(rank1,rank2)
@@ -595,14 +1135,32 @@
 				else {
 					return 0;
 				}
-			})
+			});
 			
-		d3.select("#chart").selectAll(".line_link")
+		d3.select("#chart").selectAll(".link2")
 			.data(data_nest)
 			.transition().duration(transition_time)	
+			.attr("class",function(d) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				var update_rank = -Math.sign(rank2-rank1)
+				return ("link" + (v_key+1) +" U"+(update_rank))
+			})
 			.attr("x1", function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
+				if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
+					// position if left cancer > 10
+					return (graph_separation-margin.left_page)-(line_separation)-30;
+				}
+				else {
+					return var_width;
+				}
+			})
+			.attr("x2",  function(d,i) {
+				var rank1 = d.values[0].values[0].rank
+				var rank2 = d.values[1].values[0].rank
+				// position if right cancer > 10
 				if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
 					return (graph_separation-margin.left_page)-(line_separation)-30;
 				}
@@ -614,36 +1172,27 @@
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
+					// position if left cancer > 10
 					return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
 				}
 				else {
 					return YgridSize/2;
 				}
 			})
-			.attr("x2",  function(d,i) {
-				var rank1 = d.values[0].values[0].rank
-				var rank2 = d.values[1].values[0].rank
-				if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
-					return var_width+40;
-				}
-				else {
-					return (graph_separation-margin.left_page)-(line_separation);
-				}
-			})	
 			.attr("y2",function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank
 				var rank_min = Math.min(rank1,rank2)
 				var rank_diff = (rank2-rank1)+1
-				if (rank1 < nb_cancer+1 & rank2 > nb_cancer) {
+				if (rank2 < nb_cancer+1 & rank1 > nb_cancer) {
+					// position if left cancer > 10
 					return yScale((nb_cancer+1-rank1)+(bar_space*(nb_cancer+1-rank1)))+YgridSize;
-				} else if (rank_min > nb_cancer) {
-					return YgridSize/2;
 				}
 				else {
-					return yScale(rank_diff+(bar_space*(rank_diff-1)))+YgridSize/2;
+					return YgridSize/2;
 				}
 			})
+			.attr("stroke-width", 0.5)
 			.attr("stroke", function(d,i) {
 				var rank1 = d.values[0].values[0].rank
 				var rank2 = d.values[1].values[0].rank

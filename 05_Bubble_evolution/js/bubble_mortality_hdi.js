@@ -588,7 +588,8 @@
 				else {
 					return 0;
 				}
-			});
+			})
+
 	}
 			
 	function roundNumber( value ){
@@ -626,13 +627,18 @@
 			},		
 			function(data) {
 				
-				document.getElementById('radio_old').checked= true ;
-				document.getElementById('radio_new').checked= false ;
+
+				//document.getElementById('radio_old').checked= true ;
+				//document.getElementById('radio_new').checked= false ;
 
 				var data_src = d3.nest()
             		.key( function(d){ return d.hdi_group ;  })
             		.key( function(d){ return d.sex ;  })
             		.entries( data )  ; 
+
+				//document.getElementById('radio_old').checked= true;
+				//document.getElementById('radio_new').checked= false;
+
 
 				var data_temp = data.filter(function(d){
 					return (d[group_label] == group_value)
@@ -653,8 +659,11 @@
 				document.getElementById('radio_HDI2').disabled = true;
 				
 				if (document.getElementById('check_axis').checked) {
-					update_axis(bar_graph,data_temp,true);
-					update_axis(bar_graph,data_temp,false);
+					
+					bool_scale = document.getElementById('check_scale').checked
+					
+					update_axis(bar_graph,data_temp,true,bool_scale);
+					update_axis(bar_graph,data_temp,false,bool_scale);
 				}
 
 				update_data_circle(bar_graph,data_temp, true,data_src);
@@ -666,15 +675,34 @@
 		)
 			
 	}
-					
-	function update_axis(graph,data,bool_left_graph) {
+			
+	function update_axis(graph,data,bool_left_graph, bool_scale=false) {
 		
 		var y_max1 = d3.max(data, function(d) {return d.rate1})
 		var y_max2 = d3.max(data, function(d) {return d.rate2})
 		var y_max = d3.max([y_max1,y_max2])
-		var tick_list = tick_generator(y_max)
+	
+		var y_min1 = d3.min(data, function(d) {return d.rate1})
+		var y_min2 = d3.min(data, function(d) {return d.rate2})
+		var y_min = d3.min([y_min1,y_min2])
 		
-		yScale.domain([0,tick_list.value_top]); // update xscale domain
+		if (bool_scale) {
+			
+			var tick_list = tick_generator(y_max, y_min, true) 
+			yScale = d3.scale.log().clamp(true)
+				.domain([tick_list.value_bottom,tick_list.value_top]) 
+				.range([var_height  ,0]);
+			
+		} 
+		else {
+			var tick_list = tick_generator(y_max, 0, false) // diff log scale
+			yScale = d3.scale.linear()
+				.domain([0,tick_list.value_top]) 
+				.range([var_height  ,0]);
+		}
+		
+		console.log(tick_list)
+		
 		
 		if (bool_left_graph) {
 			v_key = 0 //volume key for the array or nest data
@@ -699,6 +727,7 @@
 			.tickSize(-graph_width, 0,0)
 			.tickPadding(12)
 			.tickValues(tick_list.major)	
+			.tickFormat(d3.format(".0f"));
 			
 					
 	    var yAxis_minor = d3.svg.axis() 
@@ -777,6 +806,8 @@
 			return (d.sex==sex)
 		});
 		
+		bool_new = document.getElementById('radio_new').checked;
+		
 		graph_select.selectAll(".circle1")
 			.data(data_temp)
 			.transition().duration(transition_time).ease(ease_effect)
@@ -788,8 +819,14 @@
 		graph_select.selectAll(".circle2")
 			.data(data_temp)
 			.transition().duration(transition_time).ease(ease_effect)
-			.attr("transform", function(d, i) {
-				return "translate(" + 0 + "," + yScale(d.rate1) + ")";
+			.attr("transform",function(d,i) {
+				if (bool_new) {
+					update_range = yScale(d.rate2)
+				}
+				else {
+					update_range = yScale(d.rate1)
+				}
+				return "translate(0," + (update_range) + ")";
 			})
 			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];});
 			
@@ -809,9 +846,27 @@
 			.attr("transform",  function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
 				var offset = Math.sign(update_range)*14
-				return ( "translate(0," + ( offset + yScale(d.rate1))+ ")");	
+				if (bool_new) {
+					 offset = Math.sign(update_range)* (-27)
+					if (update_range  > 50 || update_range  < -50 ) {
+						return ( "translate(0," + (yScale(d.rate2) + offset)+ ")");
+					}
+					else {
+						return ( "translate(0," + (yScale(d.rate1) -offset)+ ")");
+					}
+				}
+				else {
+					return ( "translate(0," + (yScale(d.rate1) -offset)+ ")");
+				}				
 			})
-			.style("opacity",1);
+			.style("opacity", function(d,i) {
+				if (bool_new){
+					var update_range = yScale(d.rate2)- yScale(d.rate1)
+					if (update_range <= 50 && update_range >= -50 ) {
+						return (0);
+					} 
+				}
+			})
 		
 		graph_select.selectAll(".line_link")
 			.data(data_temp)
@@ -819,30 +874,78 @@
 	  		.style("stroke", function(d,i) {return color_cancer[d.cancer_label];}) 			
 			.attr("y1", function(d,i) {
 				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				return ((Math.sign(update_range)*20) + yScale(d.rate1))
+				return (Math.sign(update_range)*20) + yScale(d.rate1)
 			})
 			.attr("y2", function(d,i) {
-				var update_range = yScale(d.rate2)- yScale(d.rate1)
-				return ((Math.sign(update_range)*20) + yScale(d.rate1))
+				update_range = yScale(d.rate2)- yScale(d.rate1)
+				var offset = Math.sign(update_range)*(-20)
+				
+				if (bool_new) {
+					offset = Math.sign(update_range)*(-25)
+					if (update_range  > 50 || update_range  < -50 ) {
+						return(yScale(d.rate2) + offset);
+					} else {
+						return(yScale(d.rate1) - offset);
+					}
+				}
+				else {
+					return(yScale(d.rate1) - offset);
+				}
+				
 			})
-			.style("opacity",1);
+			.style("opacity", function(d,i) {
+				if (bool_new) {
+					var update_range = yScale(d.rate2)- yScale(d.rate1)
+					if (update_range <= 50 && update_range  >= -50 ) {
+						return (0);
+					} 
+				}
+				else {
+					return(1)
+				}
+			})
 			
 		graph_select.selectAll(".text1")
 			.data(data_temp)
 			.transition().duration(transition_time).ease(ease_effect)
 			.text(function(d,i) {return d.rate1})
 			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
-			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];});    // set the line colour
+			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];})    // set the line colour
+			.style("opacity", function(d,i) {
+				if (bool_new) {
+					var update_range = yScale(d.rate2)- yScale(d.rate1)
+					if (update_range  <= 25 && update_range  >= -25 ) {
+						return (0);
+					}
+				}
+				else {
+					return (1);
+				}
+					
+			});
 			
 		graph_select.selectAll(".text2")
 			.data(data_temp)
 			.transition().duration(transition_time).ease(ease_effect)
-			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
+			.attr("transform",function(d,i) {
+				if (bool_new) {
+					update_range = yScale(d.rate2)
+				}
+				else {
+					update_range = yScale(d.rate1)
+				}
+				return "translate(0," + (update_range) + ")";
+			})
 			// animate text 
 			.tween("text", function(d,i) {
-				
-				var from = data_src[0].values[d.sex-1].values[i].rate1 ; 
-				var to = data_src[1].values[d.sex-1].values[i].rate1 ; 
+				if (bool_new) {
+				  var from = data_src[0].values[d.sex-1].values[i].rate2 ; 
+				  var to = data_src[1].values[d.sex-1].values[i].rate2 ; 
+        } else {
+          var from = data_src[0].values[d.sex-1].values[i].rate1 ; 
+				  var to = data_src[1].values[d.sex-1].values[i].rate1 ; 
+          
+        }
 				if(v_key==document.getElementById('radio_HDI1').checked==true)
 		      		var i = d3.interpolate(  to , from);
 		      	else
@@ -851,10 +954,8 @@
 		        	d3.select(this).text( roundNumber(i(t)) );
 		      	};
 		    })
-			/*.text(function(d,i) {
-				console.info(  ,  )
-				return d.rate1 ; 
-			})*/
+	
+
 
 			
 		graph_select.selectAll(".cancer_label")
@@ -875,16 +976,95 @@
 					return 22;
 				}
 			})
+			.attr("transform",function(d,i) {
+				if (bool_new) {
+					var update_range = (yScale(d.rate2) + yScale(d.rate1)) / 2
+				}
+				else {
+					var update_range = yScale(d.rate1)
+				}
+				return "translate(0," + (update_range) + ")";
+			})
 			.text(function(d,i) {
 				return 0 ; 
 				// return d3.format("+.0%")((d.rate2-d.rate1)/d.rate1)
 			})
-			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
-			.style("opacity",0); 
+			.style("opacity", function(d,i) {
+				if (bool_new) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			})
+			.each("end", function() {
+				document.getElementById('radio_old').disabled = false;
+				document.getElementById('radio_new').disabled = false;
+				document.getElementById('radio_HDI1').disabled = false;
+				document.getElementById('radio_HDI2').disabled = false;
+			})
 			
 	}
 	
-	
+	function update_scale() {
+		
+		document.getElementById('radio_old').disabled = true;
+		document.getElementById('radio_new').disabled = true;
+		document.getElementById('radio_HDI1').disabled = true;
+		document.getElementById('radio_HDI2').disabled = true;
+		
+		var file_use = "data/bochen_table_data.csv"; 
+		d3.csv(file_use,
+			
+		function(d) {
+		return {
+			
+				hdi_group : +d.hdi_group,
+				sex : +d.sex,
+				cancer_label : d.cancer_label,
+				cancer_code: +d.cancer_code,
+				volume : +d.volume,
+				rate1: +d.rate1,
+				rate2: +d.rate2,
+
+			};	
+		},		
+		function(data) {
+			
+			bool_hdi = document.getElementById('radio_HDI1').checked;	
+			
+			console.log(bool_hdi)
+			var data_temp = data.filter(function(d){
+				if(bool_hdi) {
+					return (d.hdi_group == 0)
+				}
+				else {
+					return (d.hdi_group == 1)
+				}
+			});
+			
+		bool = document.getElementById('check_scale').checked;	
+		
+		var bar_graph=[ // create array with both bargraph
+				d3.select("#chart").selectAll(".bar_graph1") // draw main windows
+				,
+				d3.select("#chart").selectAll(".bar_graph2")
+				]
+		
+		
+		
+		
+		update_axis(bar_graph,data_temp,true, bool);
+        update_axis(bar_graph,data_temp,false,bool);
+		update_data_circle(bar_graph,data_temp, true);
+        update_data_circle(bar_graph,data_temp, false);
+			
+		document.getElementById('check_axis').checked = true;
+		
+		}
+		)		
+		
+	}
 	
 	function tick_generator(value_max, value_min = 0, log_scale=false )	{
 	//generate tick on the axis 
@@ -972,30 +1152,29 @@
 			} else if ((log_max/log_min) < 1000){  //if max and min difference magnitude < 1000
 				
 				if (unit_floor_min < 6) {
-					for (var i = unit_floor_min; i <= 5; i++) {
-						temp = i*log_min;
-						tick_list.major.push(temp);
+					for (var i = unit_floor_min-1; i <= 5; i++) {
+						
+						if (i == 0) {
+							temp=9*(log_min/10)
+							tick_list.major.push(temp);
+						} 
+						else {
+							temp = i*log_min;
+							tick_list.major.push(temp);
+						}
 					}
 				
 				tick_list.major.push(7*log_min);
 				
 				}
 				else {
-					tick_list.major.push((unit_floor_min)*log_min);
+					tick_list.major.push((unit_floor_min-1)*log_min);
 				}
 				
-				for (var i = unit_floor_min-1; i <= 19; i++) {
+				for (var i = unit_floor_min; i <= 19; i++) {
 					
-						if (i == 0) {
-							temp=9*(log_min/10)
-							tick_list.minor.push(temp);
-						} 
-						else {
-							temp = (i*log_min); 
-							tick_list.minor.push(temp);
-						}
-						
-
+					temp = (i*log_min); 
+					tick_list.minor.push(temp);
 				}
 				
 				while (log_min != (log_max/10)) {
@@ -1041,32 +1220,33 @@
 				
 			} else { //if max and min difference magnitude > 1000
 				
+
+				
 				if (unit_floor_min == 1) {
+					tick_list.major.push(9*(log_min/10));
 					tick_list.major.push(log_min);
 					tick_list.major.push(2*log_min);
 					tick_list.major.push(3*log_min);
 					tick_list.major.push(5*log_min);
 				} else if (unit_floor_min == 2) {
+					tick_list.major.push(log_min);
 					tick_list.major.push(2*log_min);
 					tick_list.major.push(3*log_min);
 					tick_list.major.push(5*log_min);
 				} else if (unit_floor_min < 6) {
+					tick_list.major.push(3*log_min);
 					tick_list.major.push(5*log_min);
 					tick_list.major.push(7*log_min);	
 				} else {
+					tick_list.major.push(5*log_min);
 					tick_list.major.push(7*log_min);	
 				}
 				
-				for (var i = unit_floor_min-1; i <= 9; i++) {
-					
-						if (i == 0) {
-							temp=9*(log_min/10)
-							tick_list.minor.push(temp);
-						} 
-						else {
-							temp = (i*log_min); 
-							tick_list.minor.push(temp);
-						}
+				for (var i = unit_floor_min; i <= 9; i++) {
+				
+					temp = (i*log_min); 
+					tick_list.minor.push(temp);
+
 				}
 				
 				while (log_min != (log_max/10)) {

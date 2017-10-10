@@ -915,30 +915,29 @@
 			} else if ((log_max/log_min) < 1000){  //if max and min difference magnitude < 1000
 				
 				if (unit_floor_min < 6) {
-					for (var i = unit_floor_min; i <= 5; i++) {
-						temp = i*log_min;
-						tick_list.major.push(temp);
+					for (var i = unit_floor_min-1; i <= 5; i++) {
+						
+						if (i == 0) {
+							temp=9*(log_min/10)
+							tick_list.major.push(temp);
+						} 
+						else {
+							temp = i*log_min;
+							tick_list.major.push(temp);
+						}
 					}
 				
 				tick_list.major.push(7*log_min);
 				
 				}
 				else {
-					tick_list.major.push((unit_floor_min)*log_min);
+					tick_list.major.push((unit_floor_min-1)*log_min);
 				}
 				
-				for (var i = unit_floor_min-1; i <= 19; i++) {
+				for (var i = unit_floor_min; i <= 19; i++) {
 					
-						if (i == 0) {
-							temp=9*(log_min/10)
-							tick_list.minor.push(temp);
-						} 
-						else {
-							temp = (i*log_min); 
-							tick_list.minor.push(temp);
-						}
-						
-
+					temp = (i*log_min); 
+					tick_list.minor.push(temp);
 				}
 				
 				while (log_min != (log_max/10)) {
@@ -984,32 +983,33 @@
 				
 			} else { //if max and min difference magnitude > 1000
 				
+
+				
 				if (unit_floor_min == 1) {
+					tick_list.major.push(9*(log_min/10));
 					tick_list.major.push(log_min);
 					tick_list.major.push(2*log_min);
 					tick_list.major.push(3*log_min);
 					tick_list.major.push(5*log_min);
 				} else if (unit_floor_min == 2) {
+					tick_list.major.push(log_min);
 					tick_list.major.push(2*log_min);
 					tick_list.major.push(3*log_min);
 					tick_list.major.push(5*log_min);
 				} else if (unit_floor_min < 6) {
+					tick_list.major.push(3*log_min);
 					tick_list.major.push(5*log_min);
 					tick_list.major.push(7*log_min);	
 				} else {
+					tick_list.major.push(5*log_min);
 					tick_list.major.push(7*log_min);	
 				}
 				
-				for (var i = unit_floor_min-1; i <= 9; i++) {
-					
-						if (i == 0) {
-							temp=9*(log_min/10)
-							tick_list.minor.push(temp);
-						} 
-						else {
-							temp = (i*log_min); 
-							tick_list.minor.push(temp);
-						}
+				for (var i = unit_floor_min; i <= 9; i++) {
+				
+					temp = (i*log_min); 
+					tick_list.minor.push(temp);
+
 				}
 				
 				while (log_min != (log_max/10)) {
@@ -1064,8 +1064,6 @@
 		}
 	return (tick_list)
 	}
-	
-		
 		
 	function wordwrap(text, max) { // to wrap label (not from me, forget the link)
 		var regex = new Regelastic(".{0,"+max+"}(?:\\s|$)","g");
