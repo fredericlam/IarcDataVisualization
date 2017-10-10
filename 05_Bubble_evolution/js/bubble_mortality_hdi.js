@@ -622,6 +622,8 @@
 				document.getElementById('radio_new').disabled = true;
 				document.getElementById('radio_HDI1').disabled = true;
 				document.getElementById('radio_HDI2').disabled = true;
+
+				console.info(data_temp);
 				
 				if (document.getElementById('check_axis').checked) {
 					update_axis(bar_graph,data_temp,true);
@@ -809,6 +811,13 @@
 			.data(data_temp)
 			.transition().duration(transition_time).ease(ease_effect)
 			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
+			// animate text 
+			/*.tween("text", function(d) {
+		      var i = d3.interpolate(0, d.rate1 );
+		      return function(t) {
+		        d3.select(this).text(i(t));
+		      };
+		    });*/
 			.text(function(d,i) {return d.rate1})
 
 			
