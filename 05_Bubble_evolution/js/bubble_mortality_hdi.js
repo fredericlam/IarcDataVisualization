@@ -694,11 +694,6 @@
 				.range([var_height  ,0]);
 		}
 		
-<<<<<<< HEAD
-
-=======
-		//console.log(tick_list)
->>>>>>> origin/master
 		
 		
 		if (bool_left_graph) {
@@ -1071,20 +1066,7 @@
 			
 			bool_hdi = document.getElementById('radio_HDI1').checked;	
 
-			// nested data to push it in 4th parameter
-			var data_src = d3.nest()
-        		.key( function(d){ return d.hdi_group ;  })
-        		.key( function(d){ return d.sex ;  })
-        		.entries( data )  ; 
 			
-<<<<<<< HEAD
-			var data_src = d3.nest()
-				.key( function(d){ return d.hdi_group ;  })
-				.key( function(d){ return d.sex ;  })
-				.entries( data )  ; 
-
-=======
->>>>>>> origin/master
 			var data_temp = data.filter(function(d){
 				if(bool_hdi) {
 					return (d.hdi_group == 0)
@@ -1107,13 +1089,9 @@
 		
 		update_axis(bar_graph,data_temp,true, bool);
         update_axis(bar_graph,data_temp,false,bool);
-<<<<<<< HEAD
 		update_data_circle(bar_graph,data_temp, true,null);
         update_data_circle(bar_graph,data_temp, false,null);
-=======
-		update_data_circle(bar_graph,data_temp, true,data_src);
-        update_data_circle(bar_graph,data_temp, false,data_src);
->>>>>>> origin/master
+
 			
 		document.getElementById('check_axis').checked = true;
 		
