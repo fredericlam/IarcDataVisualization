@@ -1,7 +1,4 @@
-
-
-	
-    function bubble_evo() // generate heatmap 
+ function bubble_evo() // generate heatmap 
 	{ 	
 		var file_use = "data/bochen_table_data.csv"; 
 		
@@ -628,16 +625,12 @@
 			function(data) {
 				
 
-				//document.getElementById('radio_old').checked= true ;
-				//document.getElementById('radio_new').checked= false ;
 
 				var data_src = d3.nest()
             		.key( function(d){ return d.hdi_group ;  })
             		.key( function(d){ return d.sex ;  })
             		.entries( data )  ; 
 
-				//document.getElementById('radio_old').checked= true;
-				//document.getElementById('radio_new').checked= false;
 
 
 				var data_temp = data.filter(function(d){
@@ -701,7 +694,7 @@
 				.range([var_height  ,0]);
 		}
 		
-		console.log(tick_list)
+
 		
 		
 		if (bool_left_graph) {
@@ -908,7 +901,6 @@
 		graph_select.selectAll(".text1")
 			.data(data_temp)
 			.transition().duration(transition_time).ease(ease_effect)
-			.text(function(d,i) {return d.rate1})
 			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			.attr("fill", function(d,i) {return color_cancer[d.cancer_label];})    // set the line colour
 			.style("opacity", function(d,i) {
@@ -922,7 +914,23 @@
 					return (1);
 				}
 					
-			});
+			})
+			.tween("text", function(d,i) {
+				var to = d.rate1 ;
+				if (data_src != null) {
+					var from = data_src[0].values[d.sex-1].values[i].rate1 ; 
+				}
+				else {
+					var from = to
+				} 				 
+				if(v_key==document.getElementById('radio_HDI1').checked==true)
+		      		var i = d3.interpolate(  to , from);
+		      	else
+		      		var i = d3.interpolate(  from , to );
+		      	return function(t) {
+		        	d3.select(this).text( roundNumber(i(t)) );
+		      	};
+		    })
 			
 		graph_select.selectAll(".text2")
 			.data(data_temp)
@@ -936,16 +944,22 @@
 				}
 				return "translate(0," + (update_range) + ")";
 			})
-			// animate text 
 			.tween("text", function(d,i) {
 				if (bool_new) {
-				  var from = data_src[0].values[d.sex-1].values[i].rate2 ; 
-				  var to = data_src[1].values[d.sex-1].values[i].rate2 ; 
-        } else {
-          var from = data_src[0].values[d.sex-1].values[i].rate1 ; 
-				  var to = data_src[1].values[d.sex-1].values[i].rate1 ; 
-          
-        }
+				 var to = d.rate2 ;
+				  if (data_src != null) {
+					var from = data_src[0].values[d.sex-1].values[i].rate2 ; 
+				  }	else {
+					var from = to
+				  }
+				} else {
+				  var to = d.rate1 ;
+				  if (data_src != null) {
+					 var from = data_src[0].values[d.sex-1].values[i].rate1 ; 
+				  }	else {
+					var from = to
+				  }  
+				}
 				if(v_key==document.getElementById('radio_HDI1').checked==true)
 		      		var i = d3.interpolate(  to , from);
 		      	else
@@ -985,10 +999,30 @@
 				}
 				return "translate(0," + (update_range) + ")";
 			})
-			.text(function(d,i) {
-				return 0 ; 
-				// return d3.format("+.0%")((d.rate2-d.rate1)/d.rate1)
-			})
+			//.text(function(d,i) {
+			//	return d3.format("+.0%")((d.rate2-d.rate1)/d.rate1)
+			//})
+			.tween("text", function(d,i) {
+				
+				var to = (d.rate2-d.rate1)/d.rate1;
+							
+				if (data_src != null) {
+					var from = (data_src[0].values[d.sex-1].values[i].rate2 - data_src[0].values[d.sex-1].values[i].rate1)/
+								(data_src[0].values[d.sex-1].values[i].rate1);
+				} else {
+					var from = to
+				} 
+						
+				
+				  
+				if(v_key==document.getElementById('radio_HDI1').checked==true)
+		      		var i = d3.interpolate(  to , from);
+		      	else
+		      		var i = d3.interpolate(  from , to );
+		      	return function(t) {
+		        	d3.select(this).text(d3.format("+.0%")(i(t)) );
+		      	};
+		    })
 			.style("opacity", function(d,i) {
 				if (bool_new) {
 					return 1;
@@ -1033,7 +1067,11 @@
 			
 			bool_hdi = document.getElementById('radio_HDI1').checked;	
 			
-			console.log(bool_hdi)
+			var data_src = d3.nest()
+				.key( function(d){ return d.hdi_group ;  })
+				.key( function(d){ return d.sex ;  })
+				.entries( data )  ; 
+
 			var data_temp = data.filter(function(d){
 				if(bool_hdi) {
 					return (d.hdi_group == 0)
@@ -1056,8 +1094,8 @@
 		
 		update_axis(bar_graph,data_temp,true, bool);
         update_axis(bar_graph,data_temp,false,bool);
-		update_data_circle(bar_graph,data_temp, true);
-        update_data_circle(bar_graph,data_temp, false);
+		update_data_circle(bar_graph,data_temp, true,null);
+        update_data_circle(bar_graph,data_temp, false,null);
 			
 		document.getElementById('check_axis').checked = true;
 		
@@ -1314,15 +1352,3 @@
 		return lines
 	}
 		
-
-	
-
-	
-	
-	
-		
-		
-	
-	
-	
-	
