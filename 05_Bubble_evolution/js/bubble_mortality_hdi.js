@@ -470,7 +470,7 @@
 			
 		nodes.selectAll(".text2")
 			.transition().duration(transition_time).ease(ease_effect)
-			.text(function(d,i) {
+			/*.text(function(d,i) {
 				if (bool) {
 					temp_text = d.rate2
 				}
@@ -478,7 +478,17 @@
 					temp_text = d.rate1
 				}
 				
-				return temp_text})
+				return temp_text})*/
+			.tween("text", function(d) {
+
+				if(bool)
+		      		var i = d3.interpolate(  d.rate1 , d.rate2 );
+		      	else
+		      		var i = d3.interpolate(  d.rate2 , d.rate1 );
+		      	return function(t) {
+		        	d3.select(this).text( roundNumber(i(t)) );
+		      	};
+		    })
 			.attr("transform",function(d,i) {
 				if (bool) {
 					update_range = yScale(d.rate2)
@@ -560,6 +570,17 @@
 				}
 				return "translate(0," + (update_range) + ")";
 			})
+			.tween("text", function(d) {
+
+				if(bool)
+		      		var i = d3.interpolate( 0 , (d.rate2-d.rate1)/d.rate1 );
+		      	else
+		      		var i = d3.interpolate( (d.rate2-d.rate1)/d.rate1 , 0  );
+
+		      	return function(t) {
+		        	d3.select(this).text( d3.format("+.0%")(i(t)) );
+		      	};
+		    })
 			.style("opacity",function() {
 				if (bool) {
 					return 1;
@@ -570,6 +591,10 @@
 			});
 	}
 			
+	function roundNumber( value ){
+		var val =  Math.round( value * 10) / 10 ; 
+		return val ; 
+	}
 
 	function update_data(group_label,group_value){
 		
@@ -601,10 +626,14 @@
 			},		
 			function(data) {
 				
-				document.getElementById('radio_old').checked= true;
-				document.getElementById('radio_new').checked= false;
+				document.getElementById('radio_old').checked= true ;
+				document.getElementById('radio_new').checked= false ;
 
-			
+				var data_src = d3.nest()
+            		.key( function(d){ return d.hdi_group ;  })
+            		.key( function(d){ return d.sex ;  })
+            		.entries( data )  ; 
+
 				var data_temp = data.filter(function(d){
 					return (d[group_label] == group_value)
 				});
@@ -622,16 +651,14 @@
 				document.getElementById('radio_new').disabled = true;
 				document.getElementById('radio_HDI1').disabled = true;
 				document.getElementById('radio_HDI2').disabled = true;
-
-				console.info(data_temp);
 				
 				if (document.getElementById('check_axis').checked) {
 					update_axis(bar_graph,data_temp,true);
 					update_axis(bar_graph,data_temp,false);
 				}
 
-				update_data_circle(bar_graph,data_temp, true);
-				update_data_circle(bar_graph,data_temp, false);
+				update_data_circle(bar_graph,data_temp, true,data_src);
+				update_data_circle(bar_graph,data_temp, false,data_src);
 				update_legend( false);
 				
 
@@ -735,7 +762,7 @@
 		
 	
 	}		
-	function update_data_circle(graph, data,bool_left_graph) {
+	function update_data_circle(graph, data,bool_left_graph,data_src) {
 		
 		if (bool_left_graph) {
 			sex = 1
@@ -812,13 +839,22 @@
 			.transition().duration(transition_time).ease(ease_effect)
 			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			// animate text 
-			/*.tween("text", function(d) {
-		      var i = d3.interpolate(0, d.rate1 );
-		      return function(t) {
-		        d3.select(this).text(i(t));
-		      };
-		    });*/
-			.text(function(d,i) {return d.rate1})
+			.tween("text", function(d,i) {
+				
+				var from = data_src[0].values[d.sex-1].values[i].rate1 ; 
+				var to = data_src[1].values[d.sex-1].values[i].rate1 ; 
+				if(v_key==document.getElementById('radio_HDI1').checked==true)
+		      		var i = d3.interpolate(  to , from);
+		      	else
+		      		var i = d3.interpolate(  from , to );
+		      	return function(t) {
+		        	d3.select(this).text( roundNumber(i(t)) );
+		      	};
+		    })
+			/*.text(function(d,i) {
+				console.info(  ,  )
+				return d.rate1 ; 
+			})*/
 
 			
 		graph_select.selectAll(".cancer_label")
@@ -840,7 +876,8 @@
 				}
 			})
 			.text(function(d,i) {
-				return d3.format("+.0%")((d.rate2-d.rate1)/d.rate1)
+				return 0 ; 
+				// return d3.format("+.0%")((d.rate2-d.rate1)/d.rate1)
 			})
 			.attr("transform", function(d, i) {return "translate(0," + (yScale(d.rate1)) + ")";}) 
 			.style("opacity",0); 
