@@ -1033,6 +1033,7 @@
 			
 			bool_hdi = document.getElementById('radio_HDI1').checked;	
 
+			// nested data to push it in 4th parameter
 			var data_src = d3.nest()
         		.key( function(d){ return d.hdi_group ;  })
         		.key( function(d){ return d.sex ;  })
