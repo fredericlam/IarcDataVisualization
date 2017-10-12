@@ -45,25 +45,50 @@ body {
 	}
 	
 .play-button-outer {
-  margin: 0 auto;
-  width: 2em;
-  height: 2em;
-  background-color: rgba(0, 0, 0, .25);
+  display: inline-block;
+  margin:5px 5px 5px 5px;
+  width: 3.5em;
+  height: 3.5em;
+ 
   cursor: pointer;
   opacity:1;
+  -webkit-border-radius: 10;
+  -moz-border-radius: 10;
+  border-radius: 10px;
+  -webkit-box-shadow: 0px 1px 3px #666666;
+  -moz-box-shadow: 0px 1px 3px #666666;
+  box-shadow: 0px 1px 3px #666666;
+  padding: 5px 5px 5px 5px;
+  border: solid #1f628d 2px;
 }
 
-.play-button {
-  margin: 0 auto;
-  top: 25%;
-  position: relative;  
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0.50em 0 0.50em 1em;
-  border-color: transparent transparent transparent #000;
-  opacity: .75; 
+.play-button-outer.up{
+
+  background: url('png/button_up.png');
+  background-size: 4em;
+  background-position:center;
+  background-repeat:no-repeat;
+		
 }
+
+.play-button-outer.equal{
+
+  background: url('png/button_equal.png');
+  background-size: 4em;
+  background-position:center;
+  background-repeat:no-repeat;
+		
+}
+
+.play-button-outer.down{
+
+  background: url('png/button_down.png');
+  background-size: 4em;
+  background-position:center;
+  background-repeat:no-repeat;
+		
+}
+
 
 .play-button-outer:hover {
   background-color: rgba(0, 0, 0, .5);
