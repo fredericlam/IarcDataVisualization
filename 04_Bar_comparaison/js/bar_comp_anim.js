@@ -466,8 +466,18 @@
 				
 		if (bool_go) {
 			
+						
+			document.getElementById("button_" + direction).onmouseover = function() 
+				{
+					this.style.backgroundColor = "#cccccc";
+				}
+			
+			document.getElementById("button_" + direction).onmouseout = function() 
+				{
+					this.style.backgroundColor = "#ffffff";
+				}
+			
 			d3.select("#"+ "button_"+direction)
-			.style("background-color", "#cccccc")
 			.style("box-shadow", "0 1px #969696")
 			.style("transform", "translateY(5px)")
 			
@@ -613,10 +623,10 @@
 		else {
 			
 			d3.select("#"+ "button_"+direction)
-			.style("background-color", "#ffffff")
 			.style("box-shadow", "0 4px #969696")
 			.style("transform", "translateY(0px)")
 			
+
 
 			var t0 = bar.transition().duration(transition_time/2).ease("linear");
 			
