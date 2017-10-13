@@ -467,8 +467,8 @@
 		if (bool_go) {
 			
 			d3.select("#"+ "button_"+direction)
-			.style("background-color", "#deebf7")
-			.style("box-shadow", "0 1px #27496d")
+			.style("background-color", "#cccccc")
+			.style("box-shadow", "0 1px #969696")
 			.style("transform", "translateY(5px)")
 			
 			bar.selectAll(".rect2."+direction)
@@ -614,7 +614,7 @@
 			
 			d3.select("#"+ "button_"+direction)
 			.style("background-color", "#ffffff")
-			.style("box-shadow", "0 4px #27496d")
+			.style("box-shadow", "0 4px #969696")
 			.style("transform", "translateY(0px)")
 			
 
