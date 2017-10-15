@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+ 
+  <head>
+  
+  	<title> Bubble chart mortality hdi </title>
+	<!--link rel="icon" href="favicon.ico" /-->
+	<link rel="stylesheet" href="css/bubble_evolution.css" type="text/css">
+	<script type="text/javascript" src="d3/d3.v3.min.js"></script>
+	<script type="text/javascript" src="js/bubble_bmi.js"></script>
+
+
+
+	<script type="text/javascript" src="d3/d3.v3.min.js"></script>
+	
+	
+		<script type="text/javascript">
+		
+	// variable general
+	
+
+	var ytitle= "Mean BMI (kg/m\u00B2)";
+
+	
+	var margin = { top: 150, right: 200, bottom: 100, left: 200, top_page: 100, left_page: 200 },
+	width = 1500 - margin.left - margin.right,
+	height = 800 - margin.top - margin.bottom,
+	
+	XgridSize = 30 // 20*Xgrid for the range of the bar 
+
+	//local HDI_blue "44 123 182"
+	//local HDI_violet "182 44 161"
+	
+	var color_by = ["#2c7bb6","#b62ca1"]
+	
+	var color_bubble = {};
+	color_bubble["Argentina"]                 = "#278D29";
+	color_bubble["China"]                     = "#D5BED2";
+	color_bubble["Ghana"]                     = "#FF68BC";
+	color_bubble["India"]                     = "#FF7500";
+	color_bubble["Saudi Arabia"]              = "#FFD803";
+	color_bubble["UK"]            = "#9FE72D";
+	color_bubble["USA"]  = "#006158";
+
+	
+	var ease_effect = "sin-in-out"
+	var transition_time = 1000
+	
+	var bar_space = 1.5	// Space between bar 
+	var spaceRightAxes = 20 // Space before right axes
+	var nb_bubble = 7  // nb of cancer shows (here top 10)
+	var label_wrap = 19 // size max of a label on one line
+	
+	var var_height = 550
+	
+	var graph_separation = 40
+
+	
+	
+	var xScale = d3.scale.linear()
+		.domain([1, nb_bubble])  // 
+		.range([0  ,(nb_bubble-1)* XgridSize ]);
+		
+	// width of the bar graphs
+
+	var graph_width = xScale(((nb_bubble+1)*bar_space)+nb_bubble)
+
+	
+	// I define xScale and Xaxis's here because I want them as general variable 
+
+	var yScale = d3.scale.linear()
+		.domain([0, 100]) 
+		.range([var_height  ,0]);
+		
+
+		
+	
+	 window.onload = function()
+		{
+		bubble_evo()
+		
+	};
+	
+			
+	</script>
+	
+	 
+	</head>
+  	
+	<body>
+
+	<div class="">
+
+	</div>
+	
+	<div id="header">
+		<div>
+			<h1><a href="#"> Mean BMI<br/> 1980 to 2008 </a></h1>
+			<!--div class="desc">
+				Very high HDI 
+			</div-->
+		</div>		
+	
+	</div>
+	
+		
+		<div id="chart"></div>
+		
+		<div class = "div_left">
+		<form>
+		<label><input type="radio" id="radio_old"  name="time"  checked="checked" onChange="update(false)"> 1980</label>
+		<br/>
+		<label><input type="radio" id="radio_new" name="time"   onChange="update(true)"> 2008</label>
+		</form>
+		
+		
+		<div>
+		<form>
+		<label><input type="checkbox" id="check_scale"  name="scale_update" onChange="update_scale()"> Log scale</label>
+		</br>
+		<label><input type="checkbox" id="check_axis"  name="axis_update"  checked="checked"> Update axis</label>
+		</form>
+		
+		</div>
+		</div>
+		
+		
+
+
+		
+		
+
+</body>
+ 
+</html>
+	
