@@ -109,10 +109,20 @@
 		var y_max1 = d3.max(data, function(d) {return d.rate1})
 		var y_max2 = d3.max(data, function(d) {return d.rate2})
 		var y_max = d3.max([y_max1,y_max2])
-		var tick_list = tick_generator(y_max, 20, false)
+		
+		var y_min1 = d3.min(data, function(d) {return d.rate1})
+		var y_min2 = d3.min(data, function(d) {return d.rate2})
+		var y_min = d3.min([y_min1,y_min2])
+		
+
+		
+		var tick_list = tick_generator(y_max, y_min, false)
+		
+
+		
+		yScale.domain([tick_list.value_bottom,tick_list.value_top]); // update xscale domain
 		
 		
-		yScale.domain([20,tick_list.value_top]); // update xscale domain
 		
 		if (bool_left_graph) {
 			v_key = 0 //volume key for the array or nest data
@@ -170,7 +180,7 @@
 			.attr("transform", "translate(" + (axis_x)+ "," +(0) + ")")
 			.call(yAxis_minor);
 				
-	
+ 	
 		graph_select.selectAll(".yaxis") // add Big tick
 			.data(tick_list.major, function(d) { return d; })
 			.enter()
@@ -198,7 +208,7 @@
 			.style("stroke", "black")  
 			.attr("x1", 0)
 			.attr("y1", var_height)  
-			.attr("x2", graph_width+5)
+			.attr("x2", graph_width)
 			.attr("y2", var_height);
 			
 
@@ -647,6 +657,7 @@
 		var y_min2 = d3.min(data, function(d) {return d.rate2})
 		var y_min = d3.min([y_min1,y_min2])
 		
+		
 		if (bool_scale) {
 			
 			var tick_list = tick_generator(y_max, y_min, true) 
@@ -656,9 +667,9 @@
 			
 		} 
 		else {
-			var tick_list = tick_generator(y_max, 20, false) // diff log scale
+			var tick_list = tick_generator(y_max, y_min, false) // diff log scale
 			yScale = d3.scale.linear()
-				.domain([0,tick_list.value_top]) 
+				.domain([tick_list.value_bottom,tick_list.value_top]) 
 				.range([var_height  ,0]);
 		}
 		
@@ -1045,18 +1056,22 @@
 	}
 	
 	function tick_generator(value_max, value_min = 0, log_scale=false )	{
+		
 	//generate tick on the axis 
 		//max of the value
 			//Return array if element
 			//tick_list.major: Major tick 
 			//tick_list.minor: Minor tick 
 			//tick_list.value_top: Last tick
+			
+
 		
 		var tick_list = new Object();  
 		tick_list.major = [];
 		tick_list.minor = [];
 		tick_list.value_top = value_max; // Will change according to the last tick
 		tick_list.value_bottom = value_min; // Will change according to the first tick
+		
 			
 		var log_max = Math.pow(10,Math.floor(Math.log10(value_max))); // order of magnitude of max (power of 10)
 		var unit_floor_max = Math.floor(value_max/log_max) // left digit of max 
@@ -1080,15 +1095,22 @@
 				tick_space = log_diff;
 				}
 			}
-			var value_top = Math.ceil(value_max/tick_space)*tick_space;
 			
-			var tick_list = new Object();  
-			tick_list.major = [];
-			tick_list.minor = [];
-			tick_list.value_top = value_top; 
+			
+		var value_top = Math.ceil(value_max/tick_space)*tick_space;
+		var value_bottom = Math.floor(value_min/tick_space)*tick_space;
+		
+		var tick_list = new Object();  
+		tick_list.major = [];
+		tick_list.minor = [];
+		tick_list.value_top = value_top; // Will change according to the last tick
+		tick_list.value_bottom = value_bottom; // Will change according to the first tick
+			
+			
+			
 			var bool_major = true;
 			// to create major and minor list
-			for (var i = value_min; i <= value_top; i += tick_space) {
+			for (var i = value_bottom; i <= value_top; i += tick_space) {
 				if (bool_major) {
 					tick_list.major.push(i);
 				} else {
@@ -1101,14 +1123,14 @@
 		} else {
 		
 			var temp = 0;
-			var log_min = Math.pow(10,Math.floor(Math.log10(value_min))); // order of magnitude of min (power of 10)
-			var unit_floor_min = Math.floor(value_min/log_min) // left digit of min 
 			
 			if (log_min == log_max) { // if min and max same magnitude
 			
-				for (var i = unit_floor_min-1; i <= unit_floor_max+1; i++) {
+			console.log(unit_floor_min)
+			
+				for (var i = unit_floor_min; i <= unit_floor_max+1; i++) {
 					
-					if (i == 0) {
+					if (i == 1) {
 						temp=9*(log_min/10)
 						tick_list.major.push(temp);
 					} else {
